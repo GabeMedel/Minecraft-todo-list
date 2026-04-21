@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MC Quest Tracker - Diagnostic</title>
+<style>
+  body { background: #0d1117; color: #e6edf3; font-family: monospace; font-size: 13px; padding: 24px; }
+  .ok { color: #27ae60; }
+  .err { color: #e74c3c; }
+  .warn { color: #f39c12; }
+  .step { margin: 6px 0; }
+  #status { background: #161b22; border: 1px solid #30363d; padding: 16px; max-width: 600px; margin-bottom: 24px; }
+  button { background: #238636; border: 2px solid #2ea043; color: #fff; font-family: monospace; font-size: 13px; padding: 10px 20px; cursor: pointer; margin-top: 16px; display: none; }
+</style>
+</head>
+<body>
+
+<div id="status">
+  <div class="step">⛏️ MINECRAFT QUEST TRACKER — DIAGNOSTIC MODE</div>
+  <div class="step" id="s1">⏳ Page loaded...</div>
+  <div class="step" id="s2"></div>
+  <div class="step" id="s3"></div>
+  <div class="step" id="s4"></div>
+  <div class="step" id="s5"></div>
+  <div class="step" id="s6"></div>
+</div>
+
+<button id="launch-btn" onclick="launchApp()">✅ EVERYTHING WORKS — LAUNCH APP</button>
+
+<div id="app-container"></div>
+
+<script>
+function log(id, cls, msg) {
+  var el = document.getElementById(id);
+  if (el) { el.className = "step " + cls; el.textContent = msg; }
+  console.log("[" + id + "] " + msg);
+}
+
+// Step 1: DOM loaded
+log("s1", "ok", "✅ Page HTML loaded successfully");
+
+// Step 2: Check fetch API
+try {
+  if (typeof fetch === "undefined") throw new Error("fetch not available");
+  log("s2", "ok", "✅ fetch() API available");
+} catch(e) {
+  log("s2", "err", "❌ fetch() not available: " + e.message);
+}
+
+// Step 3: Check Firebase URL reachable
+var FB = "https://minecraft-todo-7bd20-default-rtdb.firebaseio.com";
+log("s3", "warn", "⏳ Connecting to Firebase...");
+
+fetch(FB + "/ping.json")
+  .then(function(r) {
+    log("s3", "ok", "✅ Firebase reachable — HTTP " + r.status);
+    return r.json();
+  })
+  .then(function(d) {
+    log("s4", "ok", "✅ Firebase responded with data: " + JSON.stringify(d));
+    return fetch(FB + "/tasks.json");
+  })
+  .then(function(r) {
+    log("s5", "ok", "✅ /tasks endpoint — HTTP " + r.status);
+    return r.json();
+  })
+  .then(function(d) {
+    var count = d ? Object.keys(d).length : 0;
+    log("s6", "ok", "✅ Tasks loaded — " + count + " task(s) found. Everything works!");
+    document.getElementById("launch-btn").style.display = "inline-block";
+  })
+  .catch(function(e) {
+    log("s4", "err", "❌ Firebase error: " + e.message);
+    log("s5", "err", "👆 This is the problem. See fixes below.");
+    document.getElementById("status").innerHTML += [
+      '<div style="margin-top:16px;padding:12px;background:#1a0a0a;border:1px solid #e74c3c;font-size:12px;line-height:2">',
+      '<div class="err">POSSIBLE FIXES:</div>',
+      '<div>1. Firebase Console → Realtime Database → Rules</div>',
+      '<div>   Set to: { "rules": { ".read": true, ".write": true } }</div>',
+      '<div>   Click Publish</div>',
+      '<div>2. Make sure Realtime Database is enabled (not Firestore)</div>',
+      '<div>3. Check your internet connection / VPN</div>',
+      '</div>'
+    ].join("");
+  });
+
+function launchApp() {
+  document.getElementById("status").style.display = "none";
+  document.getElementById("launch-btn").style.display = "none";
+  loadFullApp();
+}
+
+function loadFullApp() {
+  // Full app injected here after diagnostics pass
+  document.getElementById("app-container").innerHTML = "<div style='color:#58a6ff;font-size:14px;padding:20px'>Loading full app...</div>";
+  
+  var s = document.createElement("script");
+  s.textContent = fullAppScript();
+  document.body.appendChild(s);
+}
+
+function fullAppScript() { return `
+(function() {
+const FB = "https://minecraft-todo-7bd20-default-rtdb.firebaseio.com";
+const CATS = ["Building","Farming","Combat","Mining","Exploration","Crafting","Other"];
+const PRIO_COL = { High:"#e74c3c", Medium:"#f39c12", Low:"#27ae60" };
+const CAT_ICON = { Building:"🏗️", Farming:"🌾", Combat:"⚔️", Mining:"⛏️", Exploration:"🗺️", Crafting:"🔨", Other:"📦" };
+
+var tasks = {}, players = ["Player 1","Player 2","Player 3","Player 4"];
+var statusFilter = "Active", editingId = null, formOpen = false;
+
+async function fbGet(p) { var r = await fetch(FB+"/"+p+".json"); return r.json(); }
+async function fbSet(p, d) { await fetch(FB+"/"+p+".json", {method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); }
+async function fbPush(p, d) { var r = await fetch(FB+"/"+p+".json", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); return r.json(); }
+async function fbDel(p) { await fetch(FB+"/"+p+".json", {method:"DELETE"}); }
+
+document.getElementById("app-container").innerHTML = \`
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+#mc * { box-sizing:border-box; }
+#mc { font-family:'Press Start 2P',monospace; font-size:10px; background:#0d1117; min-height:100vh; margin:-24px; padding:0; color:#e6edf3; }
+.mc-header { background:#161b22; border-bottom:1px solid #21262d; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.mc-tabs { background:#161b22; border-bottom:1px solid #21262d; padding:0 24px; display:flex; gap:4px; }
+.mc-tab { cursor:pointer; padding:10px 16px; border-bottom:2px solid transparent; color:#8b949e; font-size:8px; }
+.mc-tab.active { border-bottom-color:#58a6ff; color:#58a6ff; }
+.mc-main { max-width:900px; margin:0 auto; padding:24px 16px; }
+.mc-btn { border:2px solid #30363d; cursor:pointer; font-family:'Press Start 2P',monospace; font-size:8px; padding:8px 14px; background:transparent; color:#8b949e; }
+.mc-btn:hover { filter:brightness(1.2); transform:translate(-1px,-1px); }
+.mc-btn-green { background:#238636; border-color:#2ea043; color:#fff; }
+.mc-btn-sm { padding:4px 8px; }
+.mc-inp { background:#0d1117; border:1px solid #30363d; color:#e6edf3; font-family:'Press Start 2P',monospace; font-size:8px; padding:10px; width:100%; outline:none; }
+.mc-inp:focus { border-color:#58a6ff; }
+.mc-inp option { background:#161b22; }
+.mc-card { background:#161b22; border:1px solid #21262d; padding:20px; margin-bottom:16px; }
+.mc-task { background:#161b22; border:1px solid #21262d; padding:14px 16px; position:relative; margin-bottom:8px; transition:border-color 0.2s; }
+.mc-task:hover { border-color:#30363d; }
+.mc-task.done { opacity:0.4; }
+.mc-pbar { position:absolute; left:0; top:0; bottom:0; width:3px; }
+.mc-pill { display:inline-block; padding:3px 8px; font-size:7px; border:1px solid #30363d; color:#8b949e; margin-right:4px; margin-top:3px; }
+.mc-check { width:20px; height:20px; min-width:20px; border:2px solid #30363d; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; background:#0d1117; flex-shrink:0; }
+.mc-check.on { background:#27ae60; border-color:#27ae60; }
+.mc-prog-track { background:#21262d; height:6px; overflow:hidden; margin-top:6px; }
+.mc-prog-fill { height:100%; background:repeating-linear-gradient(90deg,#27ae60 0,#27ae60 8px,#1e8449 8px,#1e8449 16px); }
+.mc-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.mc-span2 { grid-column:1/-1; }
+.vt { font-family:'VT323',monospace; }
+.mc-hidden { display:none!important; }
+.mc-sdot { width:7px; height:7px; border-radius:50%; display:inline-block; animation:mc-pulse 1.5s ease-in-out infinite; }
+@keyframes mc-pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.mc-particle { position:fixed; pointer-events:none; width:6px; height:6px; z-index:9999; animation:mc-pf 0.8s ease-out forwards; }
+@keyframes mc-pf { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)} }
+</style>
+<div id="mc">
+  <div class="mc-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px">⛏️</span>
+      <div><div style="color:#58a6ff;letter-spacing:2px;font-size:11px">MINECRAFT</div><div style="color:#8b949e;font-size:7px;margin-top:3px">QUEST TRACKER</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="mc-sdot" class="mc-sdot" style="background:#27ae60"></span>
+        <span id="mc-slbl" style="color:#8b949e;font-size:7px">LIVE</span>
+      </div>
+      <span id="mc-count" style="color:#8b949e;font-size:8px">0/0</span>
+      <button id="mc-newbtn" class="mc-btn mc-btn-green" onclick="mcNewClick()">+ NEW QUEST</button>
+    </div>
+  </div>
+  <div class="mc-tabs">
+    <div class="mc-tab active" id="mc-ttasks" onclick="mcTab('tasks')">📋 QUESTS</div>
+    <div class="mc-tab" id="mc-tstats" onclick="mcTab('stats')">📊 STATS</div>
+    <div class="mc-tab" id="mc-tplayers" onclick="mcTab('players')">👥 PLAYERS</div>
+  </div>
+  <div class="mc-main">
+    <div id="mc-form" class="mc-card mc-hidden" style="border-color:#58a6ff;margin-bottom:24px">
+      <div id="mc-ftitle" style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚡ NEW QUEST</div>
+      <div class="mc-grid2">
+        <div class="mc-span2"><div style="color:#8b949e;font-size:7px;margin-bottom:6px">TITLE *</div><input class="mc-inp" id="mc-ft" placeholder="e.g. Build a nether portal..."/></div>
+        <div><div style="color:#8b949e;font-size:7px;margin-bottom:6px">CATEGORY</div><select class="mc-inp" id="mc-fc"></select></div>
+        <div><div style="color:#8b949e;font-size:7px;margin-bottom:6px">PRIORITY</div><select class="mc-inp" id="mc-fp"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+        <div><div style="color:#8b949e;font-size:7px;margin-bottom:6px">ASSIGN TO</div><select class="mc-inp" id="mc-fa"></select></div>
+        <div style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#8b949e;font-size:7px"><input type="checkbox" id="mc-fup" onchange="mcProgToggle()" style="accent-color:#58a6ff;width:auto"/> TRACK PROGRESS</label>
+          <div id="mc-fpf" class="mc-hidden" style="display:flex;gap:8px;align-items:center"><input class="mc-inp" type="number" id="mc-fpv" value="0" min="0" style="width:70px"/><span style="color:#8b949e">/</span><input class="mc-inp" type="number" id="mc-fpm" value="0" min="1" style="width:70px"/></div>
+        </div>
+        <div class="mc-span2"><div style="color:#8b949e;font-size:7px;margin-bottom:6px">NOTES</div><textarea class="mc-inp" id="mc-fn" rows="2" style="resize:vertical" placeholder="Optional notes..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button id="mc-fsub" class="mc-btn mc-btn-green" onclick="mcSubmit()">ADD QUEST</button>
+        <button class="mc-btn" onclick="mcCloseForm()">CANCEL</button>
+      </div>
+    </div>
+    <div id="mc-ptasks">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center">
+        <span style="color:#8b949e;font-size:7px">FILTER:</span>
+        <button id="mc-sfa" class="mc-btn" style="border-color:#58a6ff;color:#58a6ff;padding:5px 10px" onclick="mcStatus('Active')">ACTIVE</button>
+        <button id="mc-sfc" class="mc-btn" style="padding:5px 10px" onclick="mcStatus('Completed')">COMPLETED</button>
+        <button id="mc-sfal" class="mc-btn" style="padding:5px 10px" onclick="mcStatus('All')">ALL</button>
+        <select class="mc-inp" id="mc-fcat" onchange="mcRenderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL CATEGORIES</option></select>
+        <select class="mc-inp" id="mc-fpri" onchange="mcRenderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL PRIORITIES</option><option>High</option><option>Medium</option><option>Low</option></select>
+        <select class="mc-inp" id="mc-fply" onchange="mcRenderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL PLAYERS</option></select>
+      </div>
+      <div id="mc-tlist"></div>
+    </div>
+    <div id="mc-pstats" class="mc-hidden">
+      <div class="mc-card"><div style="color:#58a6ff;font-size:9px;margin-bottom:16px">📊 OVERALL</div><div id="mc-snums" style="display:flex;gap:20px;flex-wrap:wrap"></div><div id="mc-sbarw" class="mc-hidden" style="background:#21262d;height:12px;margin-top:16px;overflow:hidden"><div id="mc-sbar" class="mc-prog-fill" style="width:0%"></div></div></div>
+      <div class="mc-grid2">
+        <div class="mc-card"><div style="color:#58a6ff;font-size:9px;margin-bottom:16px">📂 BY CATEGORY</div><div id="mc-scat"></div></div>
+        <div class="mc-card"><div style="color:#58a6ff;font-size:9px;margin-bottom:16px">👥 BY PLAYER</div><div id="mc-sply"></div></div>
+        <div class="mc-card mc-span2"><div style="color:#58a6ff;font-size:9px;margin-bottom:16px">🎯 BY PRIORITY</div><div id="mc-spri" style="display:flex;gap:16px"></div></div>
+      </div>
+    </div>
+    <div id="mc-pplayers" class="mc-hidden">
+      <div class="mc-card"><div style="color:#58a6ff;font-size:9px;margin-bottom:16px">➕ ADD PLAYER</div><div style="display:flex;gap:10px"><input class="mc-inp" id="mc-pname" placeholder="Enter username..." onkeydown="if(event.key==='Enter')mcAddPlayer()" style="flex:1"/><button class="mc-btn mc-btn-green" onclick="mcAddPlayer()">ADD</button></div></div>
+      <div id="mc-pgrid" class="mc-grid2"></div>
+    </div>
+  </div>
+</div>\`;
+
+// populate cat selects
+CATS.forEach(function(c) {
+  document.getElementById("mc-fc").innerHTML += '<option>'+c+'</option>';
+  document.getElementById("mc-fcat").innerHTML += '<option value="'+c+'">'+c+'</option>';
+});
+
+function mcRebuildPlayers() {
+  var fa = document.getElementById("mc-fa"), fp = document.getElementById("mc-fply"), prev = fa.value;
+  fa.innerHTML = '<option value="">Unassigned</option>';
+  fp.innerHTML = '<option value="">ALL PLAYERS</option>';
+  players.forEach(function(p) { fa.innerHTML += '<option>'+p+'</option>'; fp.innerHTML += '<option value="'+p+'">'+p+'</option>'; });
+  fa.value = prev;
+}
+mcRebuildPlayers();
+
+function mcSync(on) {
+  document.getElementById("mc-sdot").style.background = on ? "#f39c12" : "#27ae60";
+  document.getElementById("mc-slbl").textContent = on ? "SYNCING..." : "LIVE";
+}
+function mcRenderAll() { mcRenderTasks(); mcRenderStats(); mcRenderPlayers(); var t=Object.keys(tasks).length, d=Object.values(tasks).filter(function(x){return x.completed;}).length; document.getElementById("mc-count").textContent=d+"/"+t; }
+function mcRenderTasks() {
+  var cat=document.getElementById("mc-fcat").value, pri=document.getElementById("mc-fpri").value, ply=document.getElementById("mc-fply").value;
+  var list = Object.entries(tasks).map(function(e){return Object.assign({},e[1],{id:e[0]});}).filter(function(t){
+    if(statusFilter==="Active"&&t.completed) return false;
+    if(statusFilter==="Completed"&&!t.completed) return false;
+    if(cat&&t.category!==cat) return false;
+    if(pri&&t.priority!==pri) return false;
+    if(ply&&t.assignee!==ply) return false;
+    return true;
+  }).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var el = document.getElementById("mc-tlist");
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:60px 0;color:#30363d"><div style="font-size:40px;margin-bottom:16px">🌲</div><div>NO QUESTS FOUND</div></div>';return;}
+  el.innerHTML = list.map(function(t) {
+    var pc=PRIO_COL[t.priority]||"#8b949e";
+    var prog=t.useProgress&&t.progressMax>0?'<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:#8b949e;font-size:7px">PROGRESS</span><span style="color:#27ae60;font-size:7px">'+(t.progress||0)+"/"+t.progressMax+'</span></div><div class="mc-prog-track"><div class="mc-prog-fill" style="width:'+Math.min(((t.progress||0)/t.progressMax)*100,100)+'%"></div></div><input type="range" min="0" max="'+t.progressMax+'" value="'+(t.progress||0)+'" oninput="mcSetProg(\''+t.id+'\',this.value)" style="width:100%;margin-top:4px;accent-color:#27ae60;cursor:pointer"/></div>':"";
+    var notes=t.notes?'<div class="vt" style="font-size:13px;color:#8b949e;margin-top:6px">📝 '+t.notes+"</div>":"";
+    var asgn=t.assignee?'<span class="mc-pill" style="border-color:#8e44ad;color:#8e44ad">👤 '+t.assignee+"</span>":"";
+    return '<div class="mc-task'+(t.completed?" done":"")+'"><div class="mc-pbar" style="background:'+pc+'"></div><div style="display:flex;align-items:flex-start;gap:10px"><div class="mc-check'+(t.completed?" on":"")+ '" onclick="mcToggle(\''+t.id+'\',event)">'+(t.completed?"✓":"")+'</div><div style="flex:1;min-width:0"><div style="margin-bottom:6px"><span class="vt" style="font-size:16px;'+(t.completed?"text-decoration:line-through;color:#8b949e":"")+'">'+(t.title||"")+'</span></div><div><span class="mc-pill">'+(CAT_ICON[t.category]||"📦")+" "+(t.category||"")+'</span><span class="mc-pill" style="border-color:'+pc+';color:'+pc+'">'+(t.priority||"")+"</span>"+asgn+"</div>"+prog+notes+'</div><div style="display:flex;gap:6px"><button class="mc-btn mc-btn-sm" onclick="mcEdit(\''+t.id+'\')" style="color:#8b949e">✏️</button><button class="mc-btn mc-btn-sm" onclick="mcDel(\''+t.id+'\')" style="color:#e74c3c">🗑️</button></div></div></div>';
+  }).join("");
+}
+function mcRenderStats() {
+  var tv=Object.values(tasks), total=tv.length, done=tv.filter(function(t){return t.completed;}).length;
+  document.getElementById("mc-snums").innerHTML=[{l:"TOTAL",v:total,c:"#58a6ff"},{l:"DONE",v:done,c:"#27ae60"},{l:"LEFT",v:total-done,c:"#f39c12"},{l:"COMPLETE",v:total?Math.round(done/total*100)+"%":"0%",c:"#8e44ad"}].map(function(s){return '<div style="text-align:center"><div class="vt" style="font-size:28px;color:'+s.c+'">'+s.v+'</div><div style="font-size:7px;color:#8b949e;margin-top:4px">'+s.l+'</div></div>';}).join("");
+  if(total){document.getElementById("mc-sbarw").classList.remove("mc-hidden");document.getElementById("mc-sbar").style.width=(done/total*100)+"%";}
+  document.getElementById("mc-scat").innerHTML=CATS.map(function(c){var n=tv.filter(function(t){return t.category===c;}).length;return n?'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">'+(CAT_ICON[c]||"")+" "+c+'</span><span class="vt" style="font-size:18px">'+n+"</span></div>":"";}).join("")||'<div style="color:#30363d;font-size:8px">NO DATA</div>';
+  document.getElementById("mc-sply").innerHTML=players.map(function(p){var n=tv.filter(function(t){return t.assignee===p&&!t.completed;}).length;return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">👤 '+p+'</span><span class="vt" style="font-size:18px">'+n+"</span></div>";}).join("");
+  document.getElementById("mc-spri").innerHTML=["High","Medium","Low"].map(function(p){var n=tv.filter(function(t){return t.priority===p;}).length;var pct=total?(n/total*100)+"%":"0%";return '<div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:'+PRIO_COL[p]+';font-size:8px">'+p+'</span><span class="vt" style="font-size:16px">'+n+'</span></div><div style="background:#21262d;height:8px"><div style="height:100%;background:'+PRIO_COL[p]+';width:'+pct+'"></div></div></div>';}).join("");
+}
+function mcRenderPlayers() {
+  var tv=Object.values(tasks);
+  document.getElementById("mc-pgrid").innerHTML=players.map(function(p){
+    var mine=tv.filter(function(t){return t.assignee===p;}), done=mine.filter(function(t){return t.completed;}).length, pct=mine.length?(done/mine.length*100)+"%":"0%", active=mine.filter(function(t){return !t.completed;}).slice(0,3);
+    return '<div class="mc-card" style="margin-bottom:0"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:9px">👤 '+p+'</span><button onclick="mcRmPlayer(\''+p+'\')" style="background:transparent;border:none;color:#30363d;cursor:pointer;font-size:16px">×</button></div><div style="display:flex;gap:16px">'+ [{v:mine.length,l:"TOTAL",c:"#58a6ff"},{v:done,l:"DONE",c:"#27ae60"},{v:mine.length-done,l:"LEFT",c:"#f39c12"}].map(function(s){return '<div style="text-align:center"><div class="vt" style="font-size:22px;color:'+s.c+'">'+s.v+'</div><div style="font-size:6px;color:#8b949e">'+s.l+'</div></div>';}).join("") +'</div>'+(mine.length?'<div class="mc-prog-track" style="margin-top:10px"><div class="mc-prog-fill" style="width:'+pct+'"></div></div>':"")+'<div style="margin-top:10px">'+active.map(function(t){return '<div class="vt" style="font-size:12px;color:#8b949e;padding:3px 0;border-bottom:1px solid #21262d">• '+t.title+'</div>';}).join("")+"</div></div>";
+  }).join("");
+}
+
+window.mcToggle = async function(id,e) { mcSpawn(e.clientX,e.clientY); var t=tasks[id]; mcSync(true); await fbSet("tasks/"+id,Object.assign({},t,{completed:!t.completed})); mcSync(false); };
+window.mcDel = async function(id) { mcSync(true); await fbDel("tasks/"+id); mcSync(false); };
+window.mcSetProg = async function(id,val) { var t=tasks[id]; await fbSet("tasks/"+id,Object.assign({},t,{progress:Math.min(parseInt(val),t.progressMax)})); };
+window.mcNewClick = function() { if(formOpen){mcCloseForm();}else{editingId=null;mcResetForm();document.getElementById("mc-ftitle").textContent="⚡ NEW QUEST";document.getElementById("mc-fsub").textContent="ADD QUEST";document.getElementById("mc-form").classList.remove("mc-hidden");document.getElementById("mc-newbtn").textContent="✕ CANCEL";formOpen=true;mcTab("tasks");} };
+window.mcCloseForm = function() { document.getElementById("mc-form").classList.add("mc-hidden");document.getElementById("mc-newbtn").textContent="+ NEW QUEST";formOpen=false;editingId=null; };
+window.mcResetForm = function() { ["mc-ft","mc-fn"].forEach(function(i){document.getElementById(i).value="";}); document.getElementById("mc-fc").value="Building";document.getElementById("mc-fp").value="Medium";document.getElementById("mc-fa").value="";document.getElementById("mc-fup").checked=false;document.getElementById("mc-fpv").value=0;document.getElementById("mc-fpm").value=0;document.getElementById("mc-fpf").classList.add("mc-hidden"); };
+window.mcProgToggle = function() { document.getElementById("mc-fpf").classList.toggle("mc-hidden",!document.getElementById("mc-fup").checked); };
+window.mcEdit = function(id) { var t=tasks[id];editingId=id;document.getElementById("mc-ft").value=t.title||"";document.getElementById("mc-fc").value=t.category||"Building";document.getElementById("mc-fp").value=t.priority||"Medium";document.getElementById("mc-fa").value=t.assignee||"";document.getElementById("mc-fup").checked=!!t.useProgress;document.getElementById("mc-fpv").value=t.progress||0;document.getElementById("mc-fpm").value=t.progressMax||0;document.getElementById("mc-fn").value=t.notes||"";document.getElementById("mc-fpf").classList.toggle("mc-hidden",!t.useProgress);document.getElementById("mc-ftitle").textContent="✏️ EDIT QUEST";document.getElementById("mc-fsub").textContent="SAVE CHANGES";document.getElementById("mc-form").classList.remove("mc-hidden");document.getElementById("mc-newbtn").textContent="✕ CANCEL";formOpen=true;mcTab("tasks");document.getElementById("mc-form").scrollIntoView({behavior:"smooth"}); };
+window.mcSubmit = async function() { var title=document.getElementById("mc-ft").value.trim();if(!title)return;var up=document.getElementById("mc-fup").checked;var data={title:title,category:document.getElementById("mc-fc").value,priority:document.getElementById("mc-fp").value,assignee:document.getElementById("mc-fa").value,notes:document.getElementById("mc-fn").value,useProgress:up,progress:up?parseInt(document.getElementById("mc-fpv").value)||0:0,progressMax:up?parseInt(document.getElementById("mc-fpm").value)||0:0};mcSync(true);if(editingId){await fbSet("tasks/"+editingId,Object.assign({},tasks[editingId],data));}else{data.completed=false;data.createdAt=Date.now();await fbPush("tasks",data);}mcSync(false);mcCloseForm();mcResetForm(); };
+window.mcAddPlayer = async function() { var name=document.getElementById("mc-pname").value.trim();if(!name||players.includes(name))return;mcSync(true);await fbSet("players",players.concat(name));document.getElementById("mc-pname").value="";mcSync(false); };
+window.mcRmPlayer = async function(p) { mcSync(true);await fbSet("players",players.filter(function(x){return x!==p;}));mcSync(false); };
+window.mcStatus = function(s) { statusFilter=s; ["Active","Completed","All"].forEach(function(x){var b=document.getElementById("mc-sf"+x[0].toLowerCase()+(x==="All"?"l":x==="Active"?"a":"c"));if(!b)return;if(x===s){b.style.borderColor="#58a6ff";b.style.color="#58a6ff";}else{b.style.borderColor="#30363d";b.style.color="#8b949e";}}); mcRenderTasks(); };
+window.mcTab = function(name) { ["tasks","stats","players"].forEach(function(t){document.getElementById("mc-p"+t).classList.toggle("mc-hidden",t!==name);document.getElementById("mc-t"+t).classList.toggle("active",t===name);}); };
+function mcSpawn(x,y) { var cols=["#5dade2","#f39c12","#27ae60","#e74c3c","#8e44ad"];for(var i=0;i<8;i++){var el=document.createElement("div");el.className="mc-particle";var dx=(Math.random()-.5)*120,dy=-(Math.random()*80+30);el.style.cssText="left:"+x+"px;top:"+y+"px;background:"+cols[i%5]+";--dx:"+dx+"px;--dy:"+dy+"px";document.body.appendChild(el);setTimeout(function(){el.remove();},850);} }
+
+// Load data and start polling
+fbGet("tasks").then(function(d){tasks=d||{};mcRenderAll();});
+fbGet("players").then(function(d){if(d){players=d;mcRebuildPlayers();mcRenderPlayers();}});
+var lastT="", lastP="";
+setInterval(function(){
+  fbGet("tasks").then(function(d){var s=JSON.stringify(d);if(s!==lastT){lastT=s;tasks=d||{};mcRenderAll();}});
+  fbGet("players").then(function(d){var s=JSON.stringify(d);if(d&&s!==lastP){lastP=s;players=d;mcRebuildPlayers();mcRenderAll();}});
+},2500);
+})();
+`; }
+</script>
+</body>
+</html>
