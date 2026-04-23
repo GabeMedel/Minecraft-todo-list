@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Minecraft Quest Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d1117; color: #e6edf3; font-family: 'Press Start 2P', monospace; font-size: 10px; min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #161b22; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+.btn { border: 2px solid #30363d; cursor: pointer; font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 8px 14px; background: transparent; color: #8b949e; transition: all 0.1s; }
+.btn:hover { transform: translate(-1px,-1px); filter: brightness(1.2); }
+.btn:active { transform: translate(1px,1px); }
+.btn-green { background: #238636; border-color: #2ea043; color: #fff; }
+.btn-blue { border-color: #58a6ff; color: #58a6ff; }
+.btn-red { border-color: #e74c3c; color: #e74c3c; }
+.btn-sm { padding: 4px 8px; }
+
+input, select, textarea { background: #0d1117; border: 1px solid #30363d; color: #e6edf3; font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 10px; width: 100%; outline: none; transition: border-color 0.2s; }
+input:focus, select:focus, textarea:focus { border-color: #58a6ff; }
+select option { background: #161b22; }
+
+.card { background: #161b22; border: 1px solid #21262d; padding: 20px; margin-bottom: 16px; }
+.card-blue { border-color: #58a6ff; }
+
+.header { background: #161b22; border-bottom: 1px solid #21262d; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.tabs { background: #161b22; border-bottom: 1px solid #21262d; padding: 0 24px; display: flex; gap: 4px; }
+.tab { cursor: pointer; padding: 10px 16px; border-bottom: 2px solid transparent; color: #8b949e; font-size: 8px; transition: all 0.2s; }
+.tab.active { border-bottom-color: #58a6ff; color: #58a6ff; }
+.tab:hover:not(.active) { color: #e6edf3; }
+.main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+.task-card { background: #161b22; border: 1px solid #21262d; padding: 14px 16px; position: relative; margin-bottom: 8px; transition: all 0.2s; }
+.task-card:hover { border-color: #30363d; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.task-card.done { opacity: 0.4; }
+.pstripe { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.pill { display: inline-block; padding: 3px 8px; font-size: 7px; border: 1px solid #30363d; color: #8b949e; margin-right: 4px; margin-top: 3px; }
+.checkbox { width: 20px; height: 20px; min-width: 20px; border: 2px solid #30363d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; background: #0d1117; flex-shrink: 0; user-select: none; transition: all 0.15s; }
+.checkbox.checked { background: #27ae60; border-color: #27ae60; }
+
+.prog-track { background: #21262d; height: 6px; overflow: hidden; margin-top: 6px; }
+.prog-fill { height: 100%; transition: width 0.4s; background: repeating-linear-gradient(90deg, #27ae60 0, #27ae60 8px, #1e8449 8px, #1e8449 16px); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.span2 { grid-column: 1 / -1; }
+
+.sdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.8); } }
+.blink { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.vt { font-family: 'VT323', monospace; }
+.hidden { display: none !important; }
+
+.particle { position: fixed; pointer-events: none; width: 6px; height: 6px; z-index: 9999; animation: pfloat 0.8s ease-out forwards; }
+@keyframes pfloat { 0% { opacity:1; transform:translate(0,0) scale(1); } 100% { opacity:0; transform:translate(var(--dx),var(--dy)) scale(0); } }
+
+#loading { position: fixed; inset: 0; background: #0d1117; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 9999; }
+#error-box { position: fixed; inset: 0; background: #0d1117; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 9999; padding: 24px; text-align: center; }
+
+/* Quest type selector */
+.qtype-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 4px; }
+.qtype-btn { border: 2px solid #30363d; background: #0d1117; color: #8b949e; cursor: pointer; padding: 10px 4px; text-align: center; font-family: 'Press Start 2P', monospace; font-size: 7px; transition: all 0.15s; }
+.qtype-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+.qtype-btn.selected { border-color: #58a6ff; background: #0d2040; color: #58a6ff; }
+.qtype-btn .qtype-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+
+/* Search dropdown */
+.search-wrap { position: relative; }
+.search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #161b22; border: 1px solid #58a6ff; border-top: none; z-index: 200; max-height: 200px; overflow-y: auto; }
+.search-item { padding: 8px 10px; cursor: pointer; font-size: 8px; color: #e6edf3; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 8px; }
+.search-item:hover { background: #21262d; color: #58a6ff; }
+.search-item .si-icon { font-size: 14px; }
+
+/* Type badge on quest cards */
+.type-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 7px; border: 1px solid; margin-right: 4px; margin-top: 3px; }
+
+/* Completion flash */
+@keyframes completionPulse { 0% { box-shadow: 0 0 0 0 rgba(39,174,96,0.6); } 100% { box-shadow: 0 0 0 20px rgba(39,174,96,0); } }
+.completing { animation: completionPulse 0.6s ease-out; border-color: #27ae60 !important; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="font-size:40px">⛏️</div>
+  <div class="blink" style="color:#58a6ff;font-size:10px">LOADING WORLD...</div>
+</div>
+
+<div id="error-box">
+  <div style="font-size:36px">💥</div>
+  <div style="color:#e74c3c;font-size:9px">CONNECTION FAILED</div>
+  <div id="err-msg" style="color:#8b949e;font-size:7px;max-width:420px;line-height:2;word-break:break-all"></div>
+  <div style="background:#161b22;border:1px solid #30363d;padding:16px;max-width:420px;text-align:left;line-height:2.5;font-size:7px;color:#8b949e">
+    FIXES:<br/>
+    1. Firebase → Realtime Database → Rules → set read+write to true → Publish<br/>
+    2. Make sure it's Realtime DB not Firestore<br/>
+    3. Disable VPN or ad blocker
+  </div>
+  <button class="btn btn-green" onclick="location.reload()">RETRY</button>
+</div>
+
+<div id="app" class="hidden">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px">⛏️</span>
+      <div>
+        <div style="color:#58a6ff;letter-spacing:2px;font-size:11px">MINECRAFT</div>
+        <div style="color:#8b949e;font-size:7px;margin-top:3px">QUEST TRACKER</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="sdot" class="sdot" style="background:#27ae60"></span>
+        <span id="slbl" style="color:#8b949e;font-size:7px">LIVE</span>
+      </div>
+      <span id="hcount" style="color:#8b949e;font-size:8px">0/0 done</span>
+      <button id="newbtn" class="btn btn-green" onclick="onNewClick()">+ NEW QUEST</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-tasks" onclick="switchTab('tasks')">📋 QUESTS</div>
+    <div class="tab" id="tab-stats" onclick="switchTab('stats')">📊 STATS</div>
+    <div class="tab" id="tab-players" onclick="switchTab('players')">👥 PLAYERS</div>
+  </div>
+
+  <div class="main">
+
+    <!-- Quest Form -->
+    <div id="form-panel" class="card card-blue hidden">
+      <div id="form-heading" style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚡ NEW QUEST</div>
+
+      <!-- Quest Type -->
+      <div style="color:#8b949e;font-size:7px;margin-bottom:8px">QUEST TYPE</div>
+      <div class="qtype-grid" style="margin-bottom:16px">
+        <div class="qtype-btn selected" onclick="selectQType('manual')" id="qt-manual">
+          <span class="qtype-icon">📋</span>MANUAL
+        </div>
+        <div class="qtype-btn" onclick="selectQType('collect')" id="qt-collect">
+          <span class="qtype-icon">🎒</span>COLLECT
+        </div>
+        <div class="qtype-btn" onclick="selectQType('kill')" id="qt-kill">
+          <span class="qtype-icon">⚔️</span>KILL
+        </div>
+        <div class="qtype-btn" onclick="selectQType('craft')" id="qt-craft">
+          <span class="qtype-icon">🔨</span>CRAFT
+        </div>
+        <div class="qtype-btn" onclick="selectQType('reach')" id="qt-reach">
+          <span class="qtype-icon">🗺️</span>REACH
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="span2">
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">QUEST TITLE *</div>
+          <input id="f-title" placeholder="e.g. Mine the nether fortress..."/>
+        </div>
+
+        <!-- Tracked target - shown for collect/kill/craft -->
+        <div class="span2" id="track-fields" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+            <div>
+              <div style="color:#8b949e;font-size:7px;margin-bottom:6px" id="track-label">ITEM TO COLLECT</div>
+              <div class="search-wrap">
+                <input id="f-target" placeholder="Search blocks, items, mobs..." autocomplete="off"
+                  oninput="onTargetSearch(this.value)" onfocus="onTargetSearch(this.value)"
+                  onblur="setTimeout(()=>document.getElementById('target-dropdown').classList.add('hidden'),150)"/>
+                <div id="target-dropdown" class="search-dropdown hidden"></div>
+              </div>
+            </div>
+            <div style="width:100px">
+              <div style="color:#8b949e;font-size:7px;margin-bottom:6px">AMOUNT</div>
+              <input id="f-amount" type="number" min="1" value="1" placeholder="64"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reach coordinates -->
+        <div class="span2" id="reach-fields" style="display:none">
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">TARGET COORDINATES</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">X</div><input id="f-cx" type="number" placeholder="0"/></div>
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">Y</div><input id="f-cy" type="number" placeholder="64"/></div>
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">Z</div><input id="f-cz" type="number" placeholder="0"/></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">CATEGORY</div>
+          <select id="f-cat"></select>
+        </div>
+        <div>
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">PRIORITY</div>
+          <select id="f-pri"><option>High</option><option selected>Medium</option><option>Low</option></select>
+        </div>
+        <div>
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">ASSIGN TO</div>
+          <select id="f-assign"></select>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:6px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#8b949e;font-size:7px">
+            <input type="checkbox" id="f-shared" style="accent-color:#58a6ff;width:auto"/>
+            SERVER-WIDE PROGRESS
+          </label>
+          <div style="color:#8b949e;font-size:6px;line-height:1.8;color:#30363d">All players contribute to one pool</div>
+        </div>
+        <div class="span2">
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">NOTES (OPTIONAL)</div>
+          <textarea id="f-notes" rows="2" style="resize:vertical" placeholder="Any extra details..."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button id="form-sub" class="btn btn-green" onclick="submitForm()">ADD QUEST</button>
+        <button class="btn" onclick="closeForm()">CANCEL</button>
+      </div>
+    </div>
+
+    <!-- Tasks Panel -->
+    <div id="panel-tasks">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center">
+        <span style="color:#8b949e;font-size:7px">FILTER:</span>
+        <button id="sf-Active" class="btn btn-blue btn-sm" onclick="setStatus('Active')">ACTIVE</button>
+        <button id="sf-Completed" class="btn btn-sm" onclick="setStatus('Completed')">COMPLETED</button>
+        <button id="sf-All" class="btn btn-sm" onclick="setStatus('All')">ALL</button>
+        <select id="flt-cat" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL CATEGORIES</option></select>
+        <select id="flt-pri" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL PRIORITIES</option><option>High</option><option>Medium</option><option>Low</option></select>
+        <select id="flt-ply" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL PLAYERS</option></select>
+        <select id="flt-type" onchange="renderTasks()" style="width:auto;padding:5px 8px">
+          <option value="">ALL TYPES</option>
+          <option value="manual">📋 MANUAL</option>
+          <option value="collect">🎒 COLLECT</option>
+          <option value="kill">⚔️ KILL</option>
+          <option value="craft">🔨 CRAFT</option>
+          <option value="reach">🗺️ REACH</option>
+        </select>
+      </div>
+      <div id="task-list"></div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div id="panel-stats" class="hidden">
+      <div class="card span2">
+        <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">📊 OVERALL PROGRESS</div>
+        <div id="st-nums" style="display:flex;gap:20px;flex-wrap:wrap"></div>
+        <div id="st-barwrap" class="hidden" style="background:#21262d;height:12px;margin-top:16px;overflow:hidden">
+          <div id="st-bar" class="prog-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">📂 BY CATEGORY</div>
+          <div id="st-cat"></div>
+        </div>
+        <div class="card">
+          <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">👥 ACTIVE BY PLAYER</div>
+          <div id="st-ply"></div>
+        </div>
+        <div class="card">
+          <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">🎯 BY PRIORITY</div>
+          <div id="st-pri" style="display:flex;gap:16px"></div>
+        </div>
+        <div class="card">
+          <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚡ BY QUEST TYPE</div>
+          <div id="st-type"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Players Panel -->
+    <div id="panel-players" class="hidden">
+      <div class="card">
+        <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">➕ ADD PLAYER</div>
+        <div style="display:flex;gap:10px">
+          <input id="new-player" style="flex:1" placeholder="Enter Minecraft username..." onkeydown="if(event.key==='Enter')addPlayer()"/>
+          <button class="btn btn-green" onclick="addPlayer()" style="white-space:nowrap">ADD</button>
+        </div>
+      </div>
+      <div id="player-grid" class="grid2"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const FB = "https://minecraft-todo-7bd20-default-rtdb.firebaseio.com";
+const CATS = ["Building","Farming","Combat","Mining","Exploration","Crafting","Other"];
+const PCOL = { High:"#e74c3c", Medium:"#f39c12", Low:"#27ae60" };
+const CICON = { Building:"🏗️", Farming:"🌾", Combat:"⚔️", Mining:"⛏️", Exploration:"🗺️", Crafting:"🔨", Other:"📦" };
+const DEF_PLAYERS = ["Player 1","Player 2","Player 3","Player 4"];
+const QTYPE_META = {
+  manual: { icon:"📋", color:"#8b949e", label:"MANUAL" },
+  collect: { icon:"🎒", color:"#58a6ff", label:"COLLECT" },
+  kill:    { icon:"⚔️", color:"#e74c3c", label:"KILL" },
+  craft:   { icon:"🔨", color:"#f39c12", label:"CRAFT" },
+  reach:   { icon:"🗺️", color:"#8e44ad", label:"REACH" }
+};
+
+// Full Minecraft block/item/mob search list
+const MC_ITEMS = [
+  // Ores & minerals
+  "Coal Ore","Deepslate Coal Ore","Iron Ore","Deepslate Iron Ore","Copper Ore","Deepslate Copper Ore",
+  "Gold Ore","Deepslate Gold Ore","Redstone Ore","Deepslate Redstone Ore","Lapis Ore","Deepslate Lapis Ore",
+  "Diamond Ore","Deepslate Diamond Ore","Emerald Ore","Deepslate Emerald Ore","Nether Gold Ore",
+  "Nether Quartz Ore","Ancient Debris",
+  // Raw materials
+  "Coal","Iron Ingot","Raw Iron","Copper Ingot","Raw Copper","Gold Ingot","Raw Gold","Redstone",
+  "Lapis Lazuli","Diamond","Emerald","Quartz","Netherite Ingot","Netherite Scrap","Amethyst Shard",
+  // Wood
+  "Oak Log","Birch Log","Spruce Log","Jungle Log","Acacia Log","Dark Oak Log","Mangrove Log","Cherry Log",
+  "Oak Planks","Birch Planks","Spruce Planks","Jungle Planks","Acacia Planks","Dark Oak Planks",
+  // Stone
+  "Stone","Cobblestone","Deepslate","Cobbled Deepslate","Granite","Diorite","Andesite","Calcite",
+  "Tuff","Basalt","Blackstone","Netherrack","End Stone","Obsidian","Crying Obsidian",
+  // Food & farming
+  "Wheat","Wheat Seeds","Carrot","Potato","Baked Potato","Beetroot","Beetroot Seeds","Melon Slice",
+  "Melon","Pumpkin","Apple","Bread","Cookie","Cake","Pumpkin Pie","Sugar Cane","Sugar",
+  "Cocoa Beans","Sweet Berries","Glow Berries","Chorus Fruit","Dried Kelp","Kelp","Bamboo",
+  // Mob drops
+  "Bone","Bone Meal","String","Spider Eye","Rotten Flesh","Gunpowder","Slimeball","Blaze Rod",
+  "Blaze Powder","Ghast Tear","Nether Star","Wither Skeleton Skull","Ender Pearl","Eye of Ender",
+  "Shulker Shell","Elytra","Totem of Undying","Trident","Heart of the Sea","Nautilus Shell",
+  "Turtle Shell","Scute","Rabbit Hide","Rabbit Foot","Leather","Feather","Egg","Wool",
+  "Ink Sac","Glow Ink Sac","Honeycomb","Honey Bottle",
+  // Crafted items
+  "Stick","Bowl","Wooden Sword","Stone Sword","Iron Sword","Golden Sword","Diamond Sword","Netherite Sword",
+  "Iron Pickaxe","Diamond Pickaxe","Netherite Pickaxe","Iron Axe","Iron Shovel","Iron Hoe",
+  "Bow","Arrow","Crossbow","Shield","Bucket","Water Bucket","Lava Bucket","Milk Bucket",
+  "Flint and Steel","Compass","Clock","Map","Fishing Rod","Shears","Name Tag","Lead",
+  "Book","Book and Quill","Enchanted Book","Paper","Lantern","Soul Lantern","Torch",
+  "Chest","Barrel","Furnace","Blast Furnace","Smoker","Crafting Table","Anvil","Grindstone",
+  "Enchanting Table","Brewing Stand","Cauldron","Dispenser","Dropper","Hopper","Piston",
+  "Sticky Piston","Observer","Comparator","Repeater","Lever","Button","Pressure Plate",
+  "Redstone Torch","Redstone Lamp","TNT","Bell","Jukebox","Note Block","Bookshelf",
+  // Potions
+  "Potion of Healing","Potion of Regeneration","Potion of Strength","Potion of Speed",
+  "Potion of Fire Resistance","Potion of Night Vision","Potion of Invisibility","Potion of Swiftness",
+  "Splash Potion of Healing","Splash Potion of Harming","Lingering Potion of Healing",
+  // Special
+  "Nether Wart","Blaze Powder","Magma Cream","Fermented Spider Eye","Glistering Melon Slice",
+  "Dragon Egg","Dragon Breath","End Crystal","Beacon","Conduit","Lodestone",
+  // Mobs (for kill quests)
+  "Zombie","Skeleton","Creeper","Spider","Cave Spider","Enderman","Witch","Blaze","Ghast",
+  "Zombie Piglin","Piglin","Piglin Brute","Hoglin","Zoglin","Strider","Magma Cube","Slime",
+  "Drowned","Husk","Stray","Phantom","Guardian","Elder Guardian","Warden","Wither","Ender Dragon",
+  "Pillager","Vindicator","Evoker","Ravager","Vex","Illusioner","Shulker","Silverfish",
+  "Endermite","Zombie Villager","Witch","Bat","Cod","Salmon","Tropical Fish","Pufferfish","Squid",
+  "Glow Squid","Dolphin","Turtle","Fox","Wolf","Cat","Horse","Donkey","Mule","Llama",
+  "Trader Llama","Parrot","Bee","Axolotl","Goat","Allay","Frog","Tadpole","Camel","Sniffer",
+  // Locations (for reach quests)
+  "Nether Portal","End Portal","Village","Desert Temple","Jungle Temple","Ocean Monument",
+  "Woodland Mansion","Nether Fortress","Bastion Remnant","End City","Stronghold",
+  "Mineshaft","Ruined Portal","Shipwreck","Ocean Ruin","Buried Treasure","Pillager Outpost"
+].sort();
+
+let tasks = {}, players = [...DEF_PLAYERS];
+let statusFilter = "Active", editingId = null, formOpen = false;
+let currentQType = "manual";
+
+// Firebase
+async function fbGet(p) { const r = await fetch(FB+"/"+p+".json"); return r.json(); }
+async function fbSet(p,d) { await fetch(FB+"/"+p+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); }
+async function fbPush(p,d) { const r = await fetch(FB+"/"+p+".json",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); return r.json(); }
+async function fbDel(p) { await fetch(FB+"/"+p+".json",{method:"DELETE"}); }
+async function fbPatch(p,d) { await fetch(FB+"/"+p+".json",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); }
+
+function setSyncing(on) {
+  document.getElementById("sdot").style.background = on ? "#f39c12" : "#27ae60";
+  document.getElementById("slbl").textContent = on ? "SYNCING..." : "LIVE";
+}
+
+async function init() {
+  try {
+    const [td, pd] = await Promise.all([fbGet("tasks"), fbGet("players")]);
+    tasks = td || {};
+    if (pd) players = pd;
+    else await fbSet("players", DEF_PLAYERS);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").classList.remove("hidden");
+    buildSelects();
+    renderAll();
+    startPolling();
+  } catch(e) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("error-box").style.display = "flex";
+    document.getElementById("err-msg").textContent = "Error: " + e.message;
+  }
+}
+
+function buildSelects() {
+  const fc = document.getElementById("f-cat");
+  const fl = document.getElementById("flt-cat");
+  CATS.forEach(c => { fc.innerHTML += `<option>${c}</option>`; fl.innerHTML += `<option value="${c}">${c}</option>`; });
+  rebuildPlayerSelects();
+}
+
+function rebuildPlayerSelects() {
+  const fa = document.getElementById("f-assign"), fp = document.getElementById("flt-ply"), prev = fa.value;
+  fa.innerHTML = '<option value="">Unassigned</option>';
+  fp.innerHTML = '<option value="">ALL PLAYERS</option>';
+  players.forEach(p => { fa.innerHTML += `<option>${p}</option>`; fp.innerHTML += `<option value="${p}">${p}</option>`; });
+  fa.value = prev;
+}
+
+function startPolling() {
+  let lastT = "", lastP = "";
+  setInterval(async () => {
+    try {
+      const td = await fbGet("tasks"); const ts = JSON.stringify(td);
+      if (ts !== lastT) {
+        // Check for auto-completions before updating
+        if (lastT) {
+          const newTasks = td || {};
+          Object.entries(newTasks).forEach(([id, t]) => {
+            if (!t.completed && t.questType && t.questType !== "manual" && t.questType !== "reach") {
+              const prog = t.progress || 0;
+              const max = t.trackAmount || 0;
+              if (max > 0 && prog >= max) {
+                autoComplete(id, t);
+              }
+            }
+          });
+        }
+        lastT = ts; tasks = td || {}; renderAll();
+      }
+      const pd = await fbGet("players"); const ps = JSON.stringify(pd);
+      if (pd && ps !== lastP) { lastP = ps; players = pd; rebuildPlayerSelects(); renderAll(); }
+    } catch(e) {}
+  }, 2500);
+}
+
+async function autoComplete(id, t) {
+  setSyncing(true);
+  await fbPatch("tasks/"+id, { completed: true, completedAt: Date.now() });
+  setSyncing(false);
+  // Flash notification
+  showNotification(`✅ QUEST COMPLETE: ${t.title}`);
+}
+
+function showNotification(msg) {
+  const el = document.createElement("div");
+  el.style.cssText = `position:fixed;top:80px;right:20px;background:#238636;border:2px solid #2ea043;color:#fff;padding:12px 16px;font-family:'Press Start 2P',monospace;font-size:8px;z-index:9999;max-width:300px;line-height:1.8;animation:pfloat 3s ease-out forwards;--dx:0px;--dy:-20px`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// Quest type selection
+function selectQType(type) {
+  currentQType = type;
+  Object.keys(QTYPE_META).forEach(t => {
+    document.getElementById("qt-"+t).classList.toggle("selected", t === type);
+  });
+  // Show/hide relevant fields
+  const trackFields = document.getElementById("track-fields");
+  const reachFields = document.getElementById("reach-fields");
+  const trackLabel = document.getElementById("track-label");
+  const targetInput = document.getElementById("f-target");
+
+  if (type === "collect") {
+    trackFields.style.display = "block";
+    reachFields.style.display = "none";
+    trackLabel.textContent = "ITEM / BLOCK TO COLLECT";
+    targetInput.placeholder = "Search items and blocks...";
+  } else if (type === "kill") {
+    trackFields.style.display = "block";
+    reachFields.style.display = "none";
+    trackLabel.textContent = "MOB TO KILL";
+    targetInput.placeholder = "Search mobs...";
+  } else if (type === "craft") {
+    trackFields.style.display = "block";
+    reachFields.style.display = "none";
+    trackLabel.textContent = "ITEM TO CRAFT";
+    targetInput.placeholder = "Search craftable items...";
+  } else if (type === "reach") {
+    trackFields.style.display = "none";
+    reachFields.style.display = "block";
+  } else {
+    trackFields.style.display = "none";
+    reachFields.style.display = "none";
+  }
+
+  // Auto-set category based on type
+  const catMap = { collect:"Mining", kill:"Combat", craft:"Crafting", reach:"Exploration" };
+  if (catMap[type]) document.getElementById("f-cat").value = catMap[type];
+}
+
+// Search
+function onTargetSearch(val) {
+  const dd = document.getElementById("target-dropdown");
+  if (!val || val.length < 1) { dd.classList.add("hidden"); return; }
+  const q = val.toLowerCase();
+  const matches = MC_ITEMS.filter(i => i.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { dd.classList.add("hidden"); return; }
+  dd.innerHTML = matches.map(m => `<div class="search-item" onmousedown="selectTarget('${m}')">
+    <span class="si-icon">${getItemIcon(m)}</span>
+    <span>${m}</span>
+  </div>`).join("");
+  dd.classList.remove("hidden");
+}
+
+function selectTarget(name) {
+  document.getElementById("f-target").value = name;
+  document.getElementById("target-dropdown").classList.add("hidden");
+  // Auto-fill title if empty
+  const titleEl = document.getElementById("f-title");
+  if (!titleEl.value) {
+    const amountEl = document.getElementById("f-amount");
+    const amount = amountEl.value || "1";
+    const typeVerbs = { collect:"Collect", kill:"Kill", craft:"Craft" };
+    const verb = typeVerbs[currentQType] || "Get";
+    titleEl.value = `${verb} ${amount} ${name}`;
+  }
+}
+
+function getItemIcon(name) {
+  const n = name.toLowerCase();
+  if (n.includes("diamond")) return "💎";
+  if (n.includes("gold") || n.includes("golden")) return "🟡";
+  if (n.includes("iron")) return "⬜";
+  if (n.includes("coal")) return "⬛";
+  if (n.includes("emerald")) return "💚";
+  if (n.includes("wood") || n.includes("log") || n.includes("plank")) return "🪵";
+  if (n.includes("stone") || n.includes("cobble")) return "🪨";
+  if (n.includes("wheat") || n.includes("carrot") || n.includes("potato")) return "🌾";
+  if (n.includes("zombie") || n.includes("skeleton") || n.includes("creeper")) return "💀";
+  if (n.includes("dragon")) return "🐉";
+  if (n.includes("sword") || n.includes("axe")) return "⚔️";
+  if (n.includes("bow") || n.includes("arrow")) return "🏹";
+  if (n.includes("potion")) return "🧪";
+  if (n.includes("book")) return "📚";
+  if (n.includes("chest")) return "📦";
+  if (n.includes("portal") || n.includes("nether")) return "🔥";
+  if (n.includes("ocean") || n.includes("ship") || n.includes("fish")) return "🌊";
+  if (n.includes("village") || n.includes("mansion")) return "🏘️";
+  return "📦";
+}
+
+// Render
+function renderAll() {
+  renderTasks(); renderStats(); renderPlayers();
+  const total = Object.keys(tasks).length;
+  const done = Object.values(tasks).filter(t => t.completed).length;
+  document.getElementById("hcount").textContent = `${done}/${total} done`;
+}
+
+function renderTasks() {
+  const cat = document.getElementById("flt-cat").value;
+  const pri = document.getElementById("flt-pri").value;
+  const ply = document.getElementById("flt-ply").value;
+  const typ = document.getElementById("flt-type").value;
+  const list = Object.entries(tasks)
+    .map(([id,t]) => ({...t, id}))
+    .filter(t => {
+      if (statusFilter === "Active" && t.completed) return false;
+      if (statusFilter === "Completed" && !t.completed) return false;
+      if (cat && t.category !== cat) return false;
+      if (pri && t.priority !== pri) return false;
+      if (ply && t.assignee !== ply) return false;
+      if (typ && (t.questType || "manual") !== typ) return false;
+      return true;
+    })
+    .sort((a,b) => {
+      const po = {High:0,Medium:1,Low:2};
+      const pd = (po[a.priority]||1) - (po[b.priority]||1);
+      if (pd !== 0) return pd;
+      return (b.createdAt||0) - (a.createdAt||0);
+    });
+
+  const el = document.getElementById("task-list");
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:60px 0;color:#30363d"><div style="font-size:40px;margin-bottom:16px">🌲</div><div style="font-size:9px">NO QUESTS FOUND</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(t => {
+    const pc = PCOL[t.priority] || "#8b949e";
+    const qtype = t.questType || "manual";
+    const qm = QTYPE_META[qtype] || QTYPE_META.manual;
+
+    // Progress section
+    let progHtml = "";
+    if (qtype !== "manual" && qtype !== "reach") {
+      const prog = t.progress || 0;
+      const max = t.trackAmount || 0;
+      const pct = max > 0 ? Math.min((prog / max) * 100, 100) : 0;
+      const target = t.trackTarget || "?";
+      if (max > 0) {
+        progHtml = `
+          <div style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;align-items:center">
+              <span style="color:#8b949e;font-size:7px">${getItemIcon(target)} ${target.toUpperCase()}</span>
+              <span style="color:${pct>=100?"#27ae60":"#58a6ff"};font-size:7px">${prog} / ${max}</span>
+            </div>
+            <div class="prog-track" style="height:8px">
+              <div class="prog-fill" style="width:${pct}%;${pct>=100?"background:#27ae60":""}"></div>
+            </div>
+            ${t.shared ? `<div style="color:#8e44ad;font-size:6px;margin-top:3px">🌐 SERVER-WIDE</div>` : ""}
+          </div>`;
+      }
+    } else if (qtype === "reach" && t.coordX !== undefined) {
+      progHtml = `<div style="margin-top:8px;color:#8e44ad;font-size:7px">📍 ${t.coordX}, ${t.coordY}, ${t.coordZ}</div>`;
+    } else if (qtype === "manual" && t.useProgress && t.progressMax > 0) {
+      const pct = Math.min(((t.progress||0)/t.progressMax)*100,100);
+      progHtml = `
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="color:#8b949e;font-size:7px">PROGRESS</span>
+            <span style="color:#27ae60;font-size:7px">${t.progress||0}/${t.progressMax}</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+          <input type="range" min="0" max="${t.progressMax}" value="${t.progress||0}"
+            oninput="setProgress('${t.id}',this.value)"
+            style="width:100%;margin-top:4px;accent-color:#27ae60;cursor:pointer"/>
+        </div>`;
+    }
+
+    const notes = t.notes ? `<div class="vt" style="font-size:13px;color:#8b949e;margin-top:6px">📝 ${t.notes}</div>` : "";
+    const asgn = t.assignee ? `<span class="pill" style="border-color:#8e44ad;color:#8e44ad">👤 ${t.assignee}</span>` : "";
+
+    return `
+    <div class="task-card${t.completed?" done":""}" id="card-${t.id}">
+      <div class="pstripe" style="background:${pc}"></div>
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="checkbox${t.completed?" checked":""}" onclick="toggleDone('${t.id}',event)">${t.completed?"✓":""}</div>
+        <div style="flex:1;min-width:0">
+          <div style="margin-bottom:6px">
+            <span class="vt" style="font-size:16px;line-height:1;${t.completed?"text-decoration:line-through;color:#8b949e":""}">${t.title}</span>
+          </div>
+          <div>
+            <span class="type-badge" style="border-color:${qm.color};color:${qm.color}">${qm.icon} ${qm.label}</span>
+            <span class="pill">${CICON[t.category]||"📦"} ${t.category||"?"}</span>
+            <span class="pill" style="border-color:${pc};color:${pc}">${t.priority||"?"}</span>
+            ${asgn}
+          </div>
+          ${progHtml}${notes}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="openEdit('${t.id}')" style="color:#8b949e">✏️</button>
+          <button class="btn btn-sm" onclick="deleteTask('${t.id}')" style="color:#e74c3c">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderStats() {
+  const tv = Object.values(tasks);
+  const total = tv.length, done = tv.filter(t=>t.completed).length;
+  document.getElementById("st-nums").innerHTML = [
+    {l:"TOTAL",v:total,c:"#58a6ff"},{l:"DONE",v:done,c:"#27ae60"},
+    {l:"LEFT",v:total-done,c:"#f39c12"},{l:"COMPLETE",v:total?Math.round(done/total*100)+"%":"0%",c:"#8e44ad"}
+  ].map(s=>`<div style="text-align:center"><div class="vt" style="font-size:28px;color:${s.c}">${s.v}</div><div style="font-size:7px;color:#8b949e;margin-top:4px">${s.l}</div></div>`).join("");
+  if (total) { document.getElementById("st-barwrap").classList.remove("hidden"); document.getElementById("st-bar").style.width=(done/total*100)+"%"; }
+  else document.getElementById("st-barwrap").classList.add("hidden");
+
+  document.getElementById("st-cat").innerHTML = CATS.map(c => {
+    const n = tv.filter(t=>t.category===c).length;
+    return n ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">${CICON[c]} ${c}</span><span class="vt" style="font-size:18px">${n}</span></div>` : "";
+  }).join("") || `<div style="color:#30363d;font-size:8px">NO DATA YET</div>`;
+
+  document.getElementById("st-ply").innerHTML = players.map(p => {
+    const n = tv.filter(t=>t.assignee===p&&!t.completed).length;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">👤 ${p}</span><span class="vt" style="font-size:18px">${n}</span></div>`;
+  }).join("");
+
+  document.getElementById("st-pri").innerHTML = ["High","Medium","Low"].map(p => {
+    const n = tv.filter(t=>t.priority===p).length;
+    return `<div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:${PCOL[p]};font-size:8px">${p}</span><span class="vt" style="font-size:16px">${n}</span></div><div style="background:#21262d;height:8px"><div style="height:100%;background:${PCOL[p]};width:${total?(n/total*100)+"%":"0%"};transition:width 0.5s"></div></div></div>`;
+  }).join("");
+
+  document.getElementById("st-type").innerHTML = Object.entries(QTYPE_META).map(([type, meta]) => {
+    const n = tv.filter(t=>(t.questType||"manual")===type).length;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:8px;color:${meta.color}">${meta.icon} ${meta.label}</span>
+      <span class="vt" style="font-size:18px;color:${meta.color}">${n}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderPlayers() {
+  const tv = Object.values(tasks);
+  document.getElementById("player-grid").innerHTML = players.map(p => {
+    const mine = tv.filter(t=>t.assignee===p);
+    const done = mine.filter(t=>t.completed).length;
+    const pct = mine.length ? (done/mine.length*100)+"%" : "0%";
+    const active = mine.filter(t=>!t.completed).slice(0,3);
+    return `<div class="card" style="margin-bottom:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:9px">👤 ${p}</span>
+        <button onclick="removePlayer('${p}')" style="background:transparent;border:none;color:#30363d;cursor:pointer;font-size:16px;line-height:1">×</button>
+      </div>
+      <div style="display:flex;gap:16px">
+        ${[{v:mine.length,l:"TOTAL",c:"#58a6ff"},{v:done,l:"DONE",c:"#27ae60"},{v:mine.length-done,l:"LEFT",c:"#f39c12"}]
+          .map(s=>`<div style="text-align:center"><div class="vt" style="font-size:22px;color:${s.c}">${s.v}</div><div style="font-size:6px;color:#8b949e">${s.l}</div></div>`).join("")}
+      </div>
+      ${mine.length ? `<div class="prog-track" style="margin-top:10px"><div class="prog-fill" style="width:${pct}"></div></div>` : ""}
+      <div style="margin-top:10px">${active.map(t=>`<div class="vt" style="font-size:12px;color:#8b949e;padding:3px 0;border-bottom:1px solid #21262d">• ${t.title}</div>`).join("")}</div>
+    </div>`;
+  }).join("");
+}
+
+// Actions
+async function toggleDone(id, e) {
+  spawnParticles(e.clientX, e.clientY);
+  setSyncing(true);
+  await fbSet("tasks/"+id, {...tasks[id], completed: !tasks[id].completed, completedAt: Date.now()});
+  setSyncing(false);
+}
+async function deleteTask(id) { if (!confirm("Delete this quest?")) return; setSyncing(true); await fbDel("tasks/"+id); setSyncing(false); }
+async function setProgress(id, val) {
+  const t = tasks[id];
+  const newProg = Math.min(parseInt(val), t.progressMax || 0);
+  await fbPatch("tasks/"+id, { progress: newProg });
+  // Auto-complete if manual progress hits max
+  if (t.questType === "manual" && t.progressMax > 0 && newProg >= t.progressMax) {
+    await fbPatch("tasks/"+id, { completed: true, completedAt: Date.now() });
+    showNotification(`✅ QUEST COMPLETE: ${t.title}`);
+  }
+}
+
+// Form
+function onNewClick() {
+  if (formOpen) { closeForm(); return; }
+  editingId = null; resetForm();
+  document.getElementById("form-heading").textContent = "⚡ NEW QUEST";
+  document.getElementById("form-sub").textContent = "ADD QUEST";
+  document.getElementById("form-panel").classList.remove("hidden");
+  document.getElementById("newbtn").textContent = "✕ CANCEL";
+  formOpen = true; switchTab("tasks");
+}
+function closeForm() {
+  document.getElementById("form-panel").classList.add("hidden");
+  document.getElementById("newbtn").textContent = "+ NEW QUEST";
+  formOpen = false; editingId = null;
+}
+function resetForm() {
+  document.getElementById("f-title").value = "";
+  document.getElementById("f-cat").value = "Building";
+  document.getElementById("f-pri").value = "Medium";
+  document.getElementById("f-assign").value = "";
+  document.getElementById("f-notes").value = "";
+  document.getElementById("f-target").value = "";
+  document.getElementById("f-amount").value = "1";
+  document.getElementById("f-cx").value = "";
+  document.getElementById("f-cy").value = "";
+  document.getElementById("f-cz").value = "";
+  document.getElementById("f-shared").checked = false;
+  selectQType("manual");
+}
+function openEdit(id) {
+  const t = tasks[id]; editingId = id;
+  document.getElementById("f-title").value = t.title || "";
+  document.getElementById("f-cat").value = t.category || "Building";
+  document.getElementById("f-pri").value = t.priority || "Medium";
+  document.getElementById("f-assign").value = t.assignee || "";
+  document.getElementById("f-notes").value = t.notes || "";
+  document.getElementById("f-shared").checked = !!t.shared;
+  selectQType(t.questType || "manual");
+  if (t.trackTarget) document.getElementById("f-target").value = t.trackTarget;
+  if (t.trackAmount) document.getElementById("f-amount").value = t.trackAmount;
+  if (t.coordX !== undefined) { document.getElementById("f-cx").value = t.coordX; document.getElementById("f-cy").value = t.coordY; document.getElementById("f-cz").value = t.coordZ; }
+  document.getElementById("form-heading").textContent = "✏️ EDIT QUEST";
+  document.getElementById("form-sub").textContent = "SAVE CHANGES";
+  document.getElementById("form-panel").classList.remove("hidden");
+  document.getElementById("newbtn").textContent = "✕ CANCEL";
+  formOpen = true; switchTab("tasks");
+  document.getElementById("form-panel").scrollIntoView({behavior:"smooth"});
+}
+async function submitForm() {
+  const title = document.getElementById("f-title").value.trim();
+  if (!title) { document.getElementById("f-title").focus(); return; }
+  const qtype = currentQType;
+  const data = {
+    title,
+    questType: qtype,
+    category: document.getElementById("f-cat").value,
+    priority: document.getElementById("f-pri").value,
+    assignee: document.getElementById("f-assign").value,
+    notes: document.getElementById("f-notes").value,
+    shared: document.getElementById("f-shared").checked,
+  };
+  if (qtype === "collect" || qtype === "kill" || qtype === "craft") {
+    data.trackTarget = document.getElementById("f-target").value.trim();
+    data.trackAmount = parseInt(document.getElementById("f-amount").value) || 1;
+    data.progress = editingId ? (tasks[editingId].progress || 0) : 0;
+  }
+  if (qtype === "reach") {
+    data.coordX = parseInt(document.getElementById("f-cx").value) || 0;
+    data.coordY = parseInt(document.getElementById("f-cy").value) || 64;
+    data.coordZ = parseInt(document.getElementById("f-cz").value) || 0;
+  }
+  if (qtype === "manual") {
+    data.useProgress = false;
+    data.progress = 0;
+    data.progressMax = 0;
+  }
+  setSyncing(true);
+  if (editingId) { await fbSet("tasks/"+editingId, {...tasks[editingId], ...data}); }
+  else { await fbPush("tasks", {...data, completed:false, createdAt:Date.now()}); }
+  setSyncing(false); closeForm(); resetForm();
+}
+
+// Players
+async function addPlayer() {
+  const name = document.getElementById("new-player").value.trim();
+  if (!name || players.includes(name)) return;
+  setSyncing(true); await fbSet("players", [...players, name]);
+  document.getElementById("new-player").value = ""; setSyncing(false);
+}
+async function removePlayer(p) { setSyncing(true); await fbSet("players", players.filter(x=>x!==p)); setSyncing(false); }
+
+// Filters
+function setStatus(s) {
+  statusFilter = s;
+  ["Active","Completed","All"].forEach(x => {
+    const b = document.getElementById("sf-"+x);
+    if (x === s) { b.classList.add("btn-blue"); b.style.borderColor="#58a6ff"; b.style.color="#58a6ff"; }
+    else { b.classList.remove("btn-blue"); b.style.borderColor="#30363d"; b.style.color="#8b949e"; }
+  });
+  renderTasks();
+}
+
+// Tabs
+function switchTab(name) {
+  ["tasks","stats","players"].forEach(t => {
+    document.getElementById("panel-"+t).classList.toggle("hidden", t!==name);
+    document.getElementById("tab-"+t).classList.toggle("active", t===name);
+  });
+}
+
+// Particles
+function spawnParticles(x, y) {
+  const cols = ["#5dade2","#f39c12","#27ae60","#e74c3c","#8e44ad"];
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement("div"); el.className = "particle";
+    const dx = (Math.random()-.5)*120, dy = -(Math.random()*80+30);
+    el.style.cssText = `left:${x}px;top:${y}px;background:${cols[i%5]};--dx:${dx}px;--dy:${dy}px`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(), 850);
+  }
+}
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
