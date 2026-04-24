@@ -11,28 +11,29 @@ body { background: #0d1117; color: #e6edf3; font-family: 'Press Start 2P', monos
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #161b22; }
 ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-
+ 
 .btn { border: 2px solid #30363d; cursor: pointer; font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 8px 14px; background: transparent; color: #8b949e; transition: all 0.1s; }
 .btn:hover { transform: translate(-1px,-1px); filter: brightness(1.2); }
 .btn:active { transform: translate(1px,1px); }
 .btn-green { background: #238636; border-color: #2ea043; color: #fff; }
 .btn-blue { border-color: #58a6ff; color: #58a6ff; }
+.btn-red { border-color: #e74c3c; color: #e74c3c; }
 .btn-sm { padding: 4px 8px; }
-
+ 
 input, select, textarea { background: #0d1117; border: 1px solid #30363d; color: #e6edf3; font-family: 'Press Start 2P', monospace; font-size: 8px; padding: 10px; width: 100%; outline: none; transition: border-color 0.2s; }
 input:focus, select:focus, textarea:focus { border-color: #58a6ff; }
 select option { background: #161b22; }
-
+ 
 .card { background: #161b22; border: 1px solid #21262d; padding: 20px; margin-bottom: 16px; }
 .card-blue { border-color: #58a6ff; }
-
+ 
 .header { background: #161b22; border-bottom: 1px solid #21262d; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .tabs { background: #161b22; border-bottom: 1px solid #21262d; padding: 0 16px; display: flex; gap: 2px; overflow-x: auto; }
 .tab { cursor: pointer; padding: 10px 12px; border-bottom: 2px solid transparent; color: #8b949e; font-size: 7px; transition: all 0.2s; white-space: nowrap; }
 .tab.active { border-bottom-color: #58a6ff; color: #58a6ff; }
 .tab:hover:not(.active) { color: #e6edf3; }
-.main { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-
+.main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+ 
 .task-card { background: #161b22; border: 1px solid #21262d; padding: 14px 16px; position: relative; margin-bottom: 8px; transition: all 0.2s; }
 .task-card:hover { border-color: #30363d; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
 .task-card.done { opacity: 0.4; }
@@ -40,46 +41,80 @@ select option { background: #161b22; }
 .pill { display: inline-block; padding: 3px 8px; font-size: 7px; border: 1px solid #30363d; color: #8b949e; margin-right: 4px; margin-top: 3px; }
 .checkbox { width: 20px; height: 20px; min-width: 20px; border: 2px solid #30363d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; background: #0d1117; flex-shrink: 0; user-select: none; transition: all 0.15s; }
 .checkbox.checked { background: #27ae60; border-color: #27ae60; }
-
-.prog-track { background: #21262d; height: 6px; overflow: hidden; margin-top: 6px; }
-.prog-fill { height: 100%; transition: width 0.4s; background: repeating-linear-gradient(90deg, #27ae60 0, #27ae60 8px, #1e8449 8px, #1e8449 16px); }
-
+ 
+.prog-track { background: #21262d; height: 8px; overflow: hidden; margin-top: 6px; border-radius: 1px; }
+.prog-fill { height: 100%; transition: width 0.5s; background: repeating-linear-gradient(90deg, #27ae60 0, #27ae60 8px, #1e8449 8px, #1e8449 16px); }
+.prog-fill.complete { background: #27ae60; }
+.prog-fill.kill { background: repeating-linear-gradient(90deg, #e74c3c 0, #e74c3c 8px, #c0392b 8px, #c0392b 16px); }
+.prog-fill.craft { background: repeating-linear-gradient(90deg, #f39c12 0, #f39c12 8px, #d68910 8px, #d68910 16px); }
+ 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .span2 { grid-column: 1 / -1; }
-
+ 
 .sdot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.8); } }
 .blink { animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .vt { font-family: 'VT323', monospace; }
 .hidden { display: none !important; }
-
+ 
 .particle { position: fixed; pointer-events: none; width: 6px; height: 6px; z-index: 9999; animation: pfloat 0.8s ease-out forwards; }
 @keyframes pfloat { 0% { opacity:1; transform:translate(0,0) scale(1); } 100% { opacity:0; transform:translate(var(--dx),var(--dy)) scale(0); } }
-
+ 
 #loading { position: fixed; inset: 0; background: #0d1117; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 9999; }
 #error-box { position: fixed; inset: 0; background: #0d1117; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 9999; padding: 24px; text-align: center; }
-
-.toast { position: fixed; bottom: 24px; right: 24px; background: #161b22; border: 1px solid #2ea043; color: #e6edf3; padding: 12px 16px; font-size: 8px; z-index: 9998; animation: slideIn 0.3s ease-out; max-width: 280px; line-height: 2; }
+ 
+.toast { position: fixed; bottom: 24px; right: 24px; background: #161b22; border: 2px solid #2ea043; color: #e6edf3; padding: 14px 16px; font-size: 8px; z-index: 9998; animation: slideIn 0.3s ease-out; max-width: 300px; line-height: 2; }
 @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
+ 
 .diff-Easy { border-color: #27ae60; color: #27ae60; }
 .diff-Medium { border-color: #f39c12; color: #f39c12; }
 .diff-Hard { border-color: #e74c3c; color: #e74c3c; }
 .diff-Legendary { border-color: #8957e5; color: #8957e5; }
-
+ 
 .comment { padding: 8px 10px; background: #0d1117; border-left: 2px solid #30363d; margin-top: 6px; }
 .comment-author { color: #58a6ff; font-size: 7px; }
 .comment-text { color: #8b949e; font-family: 'VT323', monospace; font-size: 13px; margin-top: 2px; }
+ 
+/* Quest type selector */
+.qtype-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 16px; }
+.qtype-btn { border: 2px solid #30363d; background: #0d1117; color: #8b949e; cursor: pointer; padding: 10px 4px; text-align: center; font-family: 'Press Start 2P', monospace; font-size: 6px; transition: all 0.15s; }
+.qtype-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+.qtype-btn.selected { border-color: #58a6ff; background: #0d2040; color: #58a6ff; }
+.qtype-btn .qtype-icon { font-size: 18px; display: block; margin-bottom: 5px; }
+ 
+/* Searchable dropdown */
+.search-wrap { position: relative; }
+.search-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #161b22; border: 1px solid #58a6ff; border-top: none; z-index: 300; max-height: 180px; overflow-y: auto; }
+.search-item { padding: 7px 10px; cursor: pointer; font-size: 7px; color: #e6edf3; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 8px; font-family: 'Press Start 2P', monospace; }
+.search-item:hover { background: #21262d; color: #58a6ff; }
+.search-item .si-icon { font-size: 14px; min-width: 20px; }
+ 
+/* Tracked quest progress block */
+.track-block { background: #0d1117; border: 1px solid #21262d; padding: 10px 12px; margin-top: 10px; }
+.track-target-name { font-family: 'VT323', monospace; font-size: 16px; color: #e6edf3; }
+.track-counts { color: #27ae60; font-size: 8px; }
+.track-counts.kill { color: #e74c3c; }
+.track-counts.craft { color: #f39c12; }
+.track-counts.complete { color: #27ae60; }
+ 
+/* Type badge */
+.type-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 6px; border: 1px solid; margin-right: 4px; margin-top: 3px; }
+ 
+/* Mod integration info box */
+.mod-info { background: #0d1117; border: 1px solid #30363d; border-left: 3px solid #8957e5; padding: 8px 10px; margin-top: 8px; font-size: 7px; color: #8b949e; line-height: 2; }
+ 
+@keyframes completePulse { 0% { box-shadow: 0 0 0 0 rgba(39,174,96,0.5); } 100% { box-shadow: 0 0 0 16px rgba(39,174,96,0); } }
+.just-completed { animation: completePulse 0.6s ease-out; }
 </style>
 </head>
 <body>
-
+ 
 <div id="loading">
   <div style="font-size:40px">⛏️</div>
   <div class="blink" style="color:#58a6ff;font-size:10px">LOADING WORLD...</div>
 </div>
-
+ 
 <div id="error-box">
   <div style="font-size:36px">💥</div>
   <div style="color:#e74c3c;font-size:9px">CONNECTION FAILED</div>
@@ -91,7 +126,7 @@ select option { background: #161b22; }
   </div>
   <button class="btn btn-green" onclick="location.reload()">RETRY</button>
 </div>
-
+ 
 <div id="app" class="hidden">
   <div class="header">
     <div style="display:flex;align-items:center;gap:12px">
@@ -110,23 +145,71 @@ select option { background: #161b22; }
       <button id="newbtn" class="btn btn-green" onclick="onNewClick()">+ NEW QUEST</button>
     </div>
   </div>
-
+ 
   <div class="tabs">
     <div class="tab active" id="tab-tasks" onclick="switchTab('tasks')">📋 QUESTS</div>
     <div class="tab" id="tab-stats" onclick="switchTab('stats')">📊 STATS</div>
     <div class="tab" id="tab-players" onclick="switchTab('players')">👥 PLAYERS</div>
   </div>
-
+ 
   <div class="main">
-
+ 
     <!-- FORM -->
     <div id="form-panel" class="card card-blue hidden">
       <div id="form-heading" style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚡ NEW QUEST</div>
+ 
+      <!-- Quest type -->
+      <div style="color:#8b949e;font-size:7px;margin-bottom:8px">QUEST TYPE</div>
+      <div class="qtype-grid">
+        <div class="qtype-btn selected" onclick="selectQType('manual')" id="qt-manual"><span class="qtype-icon">📋</span>MANUAL</div>
+        <div class="qtype-btn" onclick="selectQType('collect')" id="qt-collect"><span class="qtype-icon">🎒</span>COLLECT</div>
+        <div class="qtype-btn" onclick="selectQType('kill')" id="qt-kill"><span class="qtype-icon">⚔️</span>KILL</div>
+        <div class="qtype-btn" onclick="selectQType('craft')" id="qt-craft"><span class="qtype-icon">🔨</span>CRAFT</div>
+        <div class="qtype-btn" onclick="selectQType('reach')" id="qt-reach"><span class="qtype-icon">🗺️</span>REACH</div>
+      </div>
+ 
       <div class="grid2">
         <div class="span2">
           <div style="color:#8b949e;font-size:7px;margin-bottom:6px">QUEST TITLE *</div>
-          <input id="f-title" placeholder="e.g. Collect 64 iron ore..."/>
+          <input id="f-title" placeholder="Describe the quest..."/>
         </div>
+ 
+        <!-- Tracked target for collect/kill/craft -->
+        <div class="span2" id="track-fields" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 120px;gap:8px;align-items:end">
+            <div>
+              <div style="color:#8b949e;font-size:7px;margin-bottom:6px" id="track-label">ITEM TO COLLECT *</div>
+              <div class="search-wrap">
+                <input id="f-target" placeholder="Search..." autocomplete="off"
+                  oninput="onTargetSearch(this.value)"
+                  onfocus="onTargetSearch(this.value)"
+                  onblur="setTimeout(()=>document.getElementById('target-dropdown').classList.add('hidden'),180)"/>
+                <div id="target-dropdown" class="search-dropdown hidden"></div>
+              </div>
+            </div>
+            <div>
+              <div style="color:#8b949e;font-size:7px;margin-bottom:6px">AMOUNT *</div>
+              <input id="f-amount" type="number" min="1" value="1"/>
+            </div>
+          </div>
+          <!-- Server-wide toggle -->
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#8b949e;font-size:7px;margin-top:10px">
+            <input type="checkbox" id="f-shared" style="accent-color:#8957e5;width:auto"/>
+            🌐 SERVER-WIDE — all players contribute to one shared pool
+          </label>
+        </div>
+ 
+        <!-- Reach coordinates -->
+        <div class="span2" id="reach-fields" style="display:none">
+          <div style="color:#8b949e;font-size:7px;margin-bottom:6px">TARGET COORDINATES</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">X</div><input id="f-cx" type="number" placeholder="0"/></div>
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">Y</div><input id="f-cy" type="number" placeholder="64"/></div>
+            <div><div style="color:#8b949e;font-size:6px;margin-bottom:4px">Z</div><input id="f-cz" type="number" placeholder="0"/></div>
+          </div>
+          <div style="color:#30363d;font-size:6px;margin-top:6px;line-height:2">Location reach tracking requires mod — manually mark done when reached</div>
+        </div>
+ 
         <div>
           <div style="color:#8b949e;font-size:7px;margin-bottom:6px">CATEGORY</div>
           <select id="f-cat"></select>
@@ -143,17 +226,20 @@ select option { background: #161b22; }
           <div style="color:#8b949e;font-size:7px;margin-bottom:6px">ASSIGN TO</div>
           <select id="f-assign"></select>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;justify-content:center">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#8b949e;font-size:7px">
+ 
+        <!-- Manual progress only for manual type -->
+        <div id="manual-prog-row" class="span2" style="display:none">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#8b949e;font-size:7px;margin-bottom:8px">
             <input type="checkbox" id="f-useprog" onchange="toggleProgFields()" style="accent-color:#58a6ff;width:auto"/>
-            TRACK PROGRESS
+            TRACK PROGRESS MANUALLY
           </label>
           <div id="prog-fields" class="hidden" style="display:flex;gap:8px;align-items:center">
-            <input id="f-prog" type="number" min="0" value="0" style="width:70px"/>
+            <input id="f-prog" type="number" min="0" value="0" style="width:80px"/>
             <span style="color:#8b949e">/</span>
-            <input id="f-progmax" type="number" min="1" value="0" style="width:70px"/>
+            <input id="f-progmax" type="number" min="1" value="0" style="width:80px"/>
           </div>
         </div>
+ 
         <div class="span2">
           <div style="color:#8b949e;font-size:7px;margin-bottom:6px">NOTES (OPTIONAL)</div>
           <textarea id="f-notes" rows="2" style="resize:vertical" placeholder="Any extra details..."></textarea>
@@ -164,7 +250,7 @@ select option { background: #161b22; }
         <button class="btn" onclick="closeForm()">CANCEL</button>
       </div>
     </div>
-
+ 
     <!-- TASKS PANEL -->
     <div id="panel-tasks">
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center">
@@ -172,6 +258,14 @@ select option { background: #161b22; }
         <button id="sf-Active" class="btn btn-blue btn-sm" onclick="setStatus('Active')">ACTIVE</button>
         <button id="sf-Completed" class="btn btn-sm" onclick="setStatus('Completed')">COMPLETED</button>
         <button id="sf-All" class="btn btn-sm" onclick="setStatus('All')">ALL</button>
+        <select id="flt-type" onchange="renderTasks()" style="width:auto;padding:5px 8px">
+          <option value="">ALL TYPES</option>
+          <option value="manual">📋 MANUAL</option>
+          <option value="collect">🎒 COLLECT</option>
+          <option value="kill">⚔️ KILL</option>
+          <option value="craft">🔨 CRAFT</option>
+          <option value="reach">🗺️ REACH</option>
+        </select>
         <select id="flt-cat" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL CATEGORIES</option></select>
         <select id="flt-pri" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL PRIORITIES</option><option>High</option><option>Medium</option><option>Low</option></select>
         <select id="flt-diff" onchange="renderTasks()" style="width:auto;padding:5px 8px"><option value="">ALL DIFFICULTIES</option><option>Easy</option><option>Medium</option><option>Hard</option><option>Legendary</option></select>
@@ -179,10 +273,10 @@ select option { background: #161b22; }
       </div>
       <div id="task-list"></div>
     </div>
-
+ 
     <!-- STATS PANEL -->
     <div id="panel-stats" class="hidden">
-      <div class="card span2">
+      <div class="card">
         <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">📊 OVERALL PROGRESS</div>
         <div id="st-nums" style="display:flex;gap:20px;flex-wrap:wrap"></div>
         <div id="st-barwrap" class="hidden" style="background:#21262d;height:12px;margin-top:16px;overflow:hidden">
@@ -195,6 +289,10 @@ select option { background: #161b22; }
           <div id="st-cat"></div>
         </div>
         <div class="card">
+          <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚡ BY QUEST TYPE</div>
+          <div id="st-type"></div>
+        </div>
+        <div class="card">
           <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">⚔️ BY DIFFICULTY</div>
           <div id="st-diff"></div>
         </div>
@@ -202,13 +300,13 @@ select option { background: #161b22; }
           <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">👥 ACTIVE BY PLAYER</div>
           <div id="st-ply"></div>
         </div>
-        <div class="card">
+        <div class="card span2">
           <div style="color:#58a6ff;font-size:9px;margin-bottom:16px">🎯 BY PRIORITY</div>
-          <div id="st-pri" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div id="st-pri" style="display:flex;gap:20px;flex-wrap:wrap"></div>
         </div>
       </div>
     </div>
-
+ 
     <!-- PLAYERS PANEL -->
     <div id="panel-players" class="hidden">
       <div class="card">
@@ -220,16 +318,16 @@ select option { background: #161b22; }
       </div>
       <div id="player-grid" class="grid2"></div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <!-- Comment Modal -->
 <div id="comment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:16px">
   <div class="card" style="width:100%;max-width:500px;border-color:#58a6ff;max-height:80vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div style="color:#58a6ff;font-size:9px">💬 COMMENTS</div>
-      <button onclick="closeComments()" style="background:transparent;border:none;color:#8b949e;cursor:pointer;font-size:16px">×</button>
+      <button onclick="closeComments()" style="background:transparent;border:none;color:#8b949e;cursor:pointer;font-size:20px;line-height:1">×</button>
     </div>
     <div id="comment-list" style="margin-bottom:16px"></div>
     <div style="color:#8b949e;font-size:7px;margin-bottom:6px">YOUR NAME</div>
@@ -239,7 +337,7 @@ select option { background: #161b22; }
     <button class="btn btn-green" onclick="submitComment()">POST COMMENT</button>
   </div>
 </div>
-
+ 
 <script>
 const FB = "https://minecraft-todo-7bd20-default-rtdb.firebaseio.com";
 const CATS = ["Building","Farming","Combat","Mining","Exploration","Crafting","Other"];
@@ -248,20 +346,86 @@ const DCOL = { Easy:"#27ae60", Medium:"#f39c12", Hard:"#e74c3c", Legendary:"#895
 const DICON = { Easy:"🟢", Medium:"🟡", Hard:"🔴", Legendary:"💜" };
 const CICON = { Building:"🏗️", Farming:"🌾", Combat:"⚔️", Mining:"⛏️", Exploration:"🗺️", Crafting:"🔨", Other:"📦" };
 const DEF_PLAYERS = ["Player 1","Player 2","Player 3","Player 4"];
-
+ 
+const QTYPE = {
+  manual:  { icon:"📋", color:"#8b949e", label:"MANUAL",  progColor:"collect" },
+  collect: { icon:"🎒", color:"#58a6ff", label:"COLLECT", progColor:"collect" },
+  kill:    { icon:"⚔️", color:"#e74c3c", label:"KILL",    progColor:"kill"    },
+  craft:   { icon:"🔨", color:"#f39c12", label:"CRAFT",   progColor:"craft"   },
+  reach:   { icon:"🗺️", color:"#8e44ad", label:"REACH",   progColor:"collect" }
+};
+ 
+// Full Minecraft item/block/mob list for search
+// Pattern: display name → registry path is display.toLowerCase().replace(/ /g,'_')
+const MC_ITEMS = [
+  "Coal Ore","Deepslate Coal Ore","Iron Ore","Deepslate Iron Ore","Copper Ore","Deepslate Copper Ore",
+  "Gold Ore","Deepslate Gold Ore","Redstone Ore","Deepslate Redstone Ore","Lapis Ore","Deepslate Lapis Ore",
+  "Diamond Ore","Deepslate Diamond Ore","Emerald Ore","Deepslate Emerald Ore","Nether Gold Ore",
+  "Nether Quartz Ore","Ancient Debris",
+  "Coal","Iron Ingot","Raw Iron","Copper Ingot","Raw Copper","Gold Ingot","Raw Gold","Redstone",
+  "Lapis Lazuli","Diamond","Emerald","Quartz","Netherite Ingot","Netherite Scrap","Amethyst Shard",
+  "Oak Log","Birch Log","Spruce Log","Jungle Log","Acacia Log","Dark Oak Log","Mangrove Log","Cherry Log",
+  "Oak Planks","Birch Planks","Spruce Planks","Jungle Planks","Acacia Planks","Dark Oak Planks",
+  "Stone","Cobblestone","Deepslate","Cobbled Deepslate","Granite","Diorite","Andesite","Calcite",
+  "Tuff","Basalt","Blackstone","Netherrack","End Stone","Obsidian","Crying Obsidian",
+  "Wheat","Wheat Seeds","Carrot","Potato","Baked Potato","Beetroot","Beetroot Seeds","Melon Slice",
+  "Melon","Pumpkin","Apple","Bread","Cookie","Sugar Cane","Sugar","Cocoa Beans","Sweet Berries",
+  "Glow Berries","Chorus Fruit","Dried Kelp","Kelp","Bamboo",
+  "Bone","Bone Meal","String","Spider Eye","Rotten Flesh","Gunpowder","Slimeball","Blaze Rod",
+  "Blaze Powder","Ghast Tear","Nether Star","Ender Pearl","Eye of Ender","Shulker Shell","Elytra",
+  "Totem of Undying","Trident","Heart of the Sea","Nautilus Shell","Turtle Shell","Scute",
+  "Rabbit Hide","Rabbit Foot","Leather","Feather","Egg","Wool","Ink Sac","Glow Ink Sac",
+  "Honeycomb","Honey Bottle",
+  "Stick","Wooden Sword","Stone Sword","Iron Sword","Golden Sword","Diamond Sword","Netherite Sword",
+  "Iron Pickaxe","Diamond Pickaxe","Netherite Pickaxe","Iron Axe","Iron Shovel","Iron Hoe",
+  "Bow","Arrow","Crossbow","Shield","Bucket","Water Bucket","Lava Bucket","Milk Bucket",
+  "Flint and Steel","Compass","Clock","Map","Fishing Rod","Shears","Name Tag","Lead",
+  "Book","Enchanted Book","Paper","Lantern","Soul Lantern","Torch",
+  "Chest","Barrel","Furnace","Blast Furnace","Smoker","Crafting Table","Anvil","Grindstone",
+  "Enchanting Table","Brewing Stand","Cauldron","Dispenser","Dropper","Hopper","Piston",
+  "Sticky Piston","Observer","Comparator","Repeater","Lever","TNT","Bell","Jukebox","Bookshelf",
+  "Potion of Healing","Potion of Regeneration","Potion of Strength","Potion of Speed",
+  "Potion of Fire Resistance","Potion of Night Vision","Potion of Invisibility",
+  "Nether Wart","Magma Cream","Fermented Spider Eye","Glistering Melon Slice",
+  "Dragon Egg","Dragon Breath","End Crystal","Beacon","Conduit",
+  // Mobs
+  "Zombie","Skeleton","Creeper","Spider","Cave Spider","Enderman","Witch","Blaze","Ghast",
+  "Zombie Piglin","Piglin","Piglin Brute","Hoglin","Zoglin","Strider","Magma Cube","Slime",
+  "Drowned","Husk","Stray","Phantom","Guardian","Elder Guardian","Warden","Wither","Ender Dragon",
+  "Pillager","Vindicator","Evoker","Ravager","Vex","Shulker","Silverfish","Endermite",
+  "Zombie Villager","Bat","Cod","Salmon","Tropical Fish","Pufferfish","Squid","Glow Squid",
+  "Dolphin","Turtle","Fox","Wolf","Cat","Horse","Donkey","Mule","Llama","Parrot","Bee",
+  "Axolotl","Goat","Allay","Frog","Camel","Sniffer"
+].sort();
+ 
+// Convert display name to registry path: "Coal Ore" → "coal_ore"
+function displayToRegistry(name) {
+  return name.toLowerCase().replace(/ /g, '_');
+}
+ 
+// Convert registry path to display name: "coal_ore" → "Coal Ore"
+function registryToDisplay(path) {
+  return path.replace('minecraft:', '').split('_')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+ 
 let tasks = {}, players = [...DEF_PLAYERS];
 let statusFilter = "Active", editingId = null, formOpen = false, commentTaskId = null;
-
+let currentQType = "manual";
+ 
+// Firebase
 async function fbGet(p) { const r = await fetch(FB+"/"+p+".json"); return r.json(); }
 async function fbSet(p,d) { await fetch(FB+"/"+p+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); }
 async function fbPush(p,d) { const r = await fetch(FB+"/"+p+".json",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); return r.json(); }
 async function fbDel(p) { await fetch(FB+"/"+p+".json",{method:"DELETE"}); }
-
+async function fbPatch(p,d) { await fetch(FB+"/"+p+".json",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}); }
+ 
 function setSyncing(on) {
   document.getElementById("sdot").style.background = on ? "#f39c12" : "#27ae60";
   document.getElementById("slbl").textContent = on ? "SYNCING..." : "LIVE";
 }
-
+ 
 async function init() {
   try {
     const [td, pd] = await Promise.all([fbGet("tasks"), fbGet("players")]);
@@ -278,7 +442,7 @@ async function init() {
     document.getElementById("err-msg").textContent = "Error: " + e.message;
   }
 }
-
+ 
 function buildSelects() {
   const fc = document.getElementById("f-cat"), fl = document.getElementById("flt-cat");
   CATS.forEach(c => { fc.innerHTML += `<option>${c}</option>`; fl.innerHTML += `<option value="${c}">${c}</option>`; });
@@ -296,7 +460,7 @@ function rebuildPlayerSelects() {
   players.forEach(p => fp.innerHTML += `<option value="${p}">${p}</option>`);
   fp.value = prev2;
 }
-
+ 
 function startPolling() {
   let lastT = "", lastP = "";
   setInterval(async () => {
@@ -306,9 +470,21 @@ function startPolling() {
         if (lastT !== "") {
           const prev = JSON.parse(lastT) || {};
           const curr = td || {};
+          // Detect completions
           Object.entries(curr).forEach(([id, t]) => {
             if (t.completed && prev[id] && !prev[id].completed) {
-              showToast("🎉 Quest completed!", t.title, t.assignee);
+              showToast("🎉 Quest Complete!", t.title, t.assignee);
+              spawnParticlesCenter();
+            }
+            // Detect progress updates on tracked quests
+            if (!t.completed && prev[id] && t.progress !== prev[id].progress) {
+              const qtype = t.questType || "manual";
+              if (qtype !== "manual" && qtype !== "reach") {
+                const pct = t.trackAmount > 0 ? Math.round((t.progress / t.trackAmount) * 100) : 0;
+                if (pct > 0 && pct % 25 === 0) {
+                  showToast(`${QTYPE[qtype].icon} Progress ${pct}%`, t.title, t.assignee);
+                }
+              }
             }
           });
         }
@@ -319,27 +495,106 @@ function startPolling() {
     } catch(e) {}
   }, 2500);
 }
-
+ 
 function showToast(title, questName, player) {
+  // Remove existing toasts
+  document.querySelectorAll('.toast').forEach(t => t.remove());
   const el = document.createElement("div");
   el.className = "toast";
-  el.innerHTML = `<div style="color:#27ae60;margin-bottom:4px">${title}</div><div style="color:#8b949e">${questName}</div>${player ? `<div style="color:#58a6ff;font-size:7px;margin-top:2px">by ${player}</div>` : ""}`;
+  el.innerHTML = `<div style="color:#27ae60;margin-bottom:4px">${title}</div><div style="color:#e6edf3">${questName}</div>${player ? `<div style="color:#58a6ff;font-size:6px;margin-top:3px">👤 ${player}</div>` : ""}`;
   document.body.appendChild(el);
   setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.5s"; setTimeout(() => el.remove(), 500); }, 4000);
 }
-
+ 
+// Quest type selection
+function selectQType(type) {
+  currentQType = type;
+  Object.keys(QTYPE).forEach(t => document.getElementById("qt-"+t).classList.toggle("selected", t === type));
+  const trackFields = document.getElementById("track-fields");
+  const reachFields = document.getElementById("reach-fields");
+  const manualProg = document.getElementById("manual-prog-row");
+  const trackLabel = document.getElementById("track-label");
+  const targetInput = document.getElementById("f-target");
+ 
+  trackFields.style.display = ["collect","kill","craft"].includes(type) ? "block" : "none";
+  reachFields.style.display = type === "reach" ? "block" : "none";
+  manualProg.style.display = type === "manual" ? "block" : "none";
+ 
+  if (type === "collect") { trackLabel.textContent = "ITEM / BLOCK TO COLLECT *"; targetInput.placeholder = "Search items and blocks..."; }
+  else if (type === "kill") { trackLabel.textContent = "MOB TO KILL *"; targetInput.placeholder = "Search mobs..."; }
+  else if (type === "craft") { trackLabel.textContent = "ITEM TO CRAFT *"; targetInput.placeholder = "Search craftable items..."; }
+ 
+  // Auto-set category
+  const catMap = { collect:"Mining", kill:"Combat", craft:"Crafting", reach:"Exploration" };
+  if (catMap[type]) document.getElementById("f-cat").value = catMap[type];
+}
+ 
+// Search
+function onTargetSearch(val) {
+  const dd = document.getElementById("target-dropdown");
+  if (!val || val.length < 1) { dd.classList.add("hidden"); return; }
+  const q = val.toLowerCase();
+  const matches = MC_ITEMS.filter(i => i.toLowerCase().includes(q)).slice(0, 18);
+  if (!matches.length) { dd.classList.add("hidden"); return; }
+  dd.innerHTML = matches.map(m => `<div class="search-item" onmousedown="selectTarget('${m}')">
+    <span class="si-icon">${getItemIcon(m)}</span><span>${m}</span>
+  </div>`).join("");
+  dd.classList.remove("hidden");
+}
+ 
+function selectTarget(name) {
+  document.getElementById("f-target").value = name;
+  document.getElementById("target-dropdown").classList.add("hidden");
+  // Auto-fill title if empty
+  const titleEl = document.getElementById("f-title");
+  if (!titleEl.value) {
+    const verbs = { collect:"Collect", kill:"Kill", craft:"Craft" };
+    titleEl.value = `${verbs[currentQType] || "Get"} ${name}`;
+  }
+}
+ 
+function getItemIcon(name) {
+  const n = name.toLowerCase();
+  if (n.includes("diamond")) return "💎";
+  if (n.includes("gold") || n.includes("golden")) return "🟡";
+  if (n.includes("emerald")) return "💚";
+  if (n.includes("iron")) return "⬜";
+  if (n.includes("coal")) return "⬛";
+  if (n.includes("netherite")) return "🟫";
+  if (n.includes("log") || n.includes("wood") || n.includes("plank")) return "🪵";
+  if (n.includes("stone") || n.includes("cobble") || n.includes("deepslate")) return "🪨";
+  if (n.includes("wheat") || n.includes("carrot") || n.includes("potato") || n.includes("crop")) return "🌾";
+  if (n.includes("zombie") || n.includes("skeleton") || n.includes("creeper") || n.includes("witch")) return "💀";
+  if (n.includes("dragon")) return "🐉";
+  if (n.includes("warden")) return "👁️";
+  if (n.includes("wither")) return "💀";
+  if (n.includes("sword") || n.includes("axe")) return "⚔️";
+  if (n.includes("bow") || n.includes("arrow")) return "🏹";
+  if (n.includes("potion")) return "🧪";
+  if (n.includes("book")) return "📚";
+  if (n.includes("ender")) return "🟣";
+  if (n.includes("nether")) return "🔥";
+  if (n.includes("chest") || n.includes("barrel")) return "📦";
+  if (n.includes("blaze") || n.includes("ghast") || n.includes("magma")) return "🔥";
+  if (n.includes("wolf") || n.includes("fox") || n.includes("bee")) return "🐾";
+  return "📦";
+}
+ 
+// Render
 function renderAll() {
   renderTasks(); renderStats(); renderPlayers();
   const total = Object.keys(tasks).length;
   const done = Object.values(tasks).filter(t => t.completed).length;
   document.getElementById("hcount").textContent = `${done}/${total} done`;
 }
-
+ 
 function renderTasks() {
   const cat = document.getElementById("flt-cat").value;
   const pri = document.getElementById("flt-pri").value;
   const diff = document.getElementById("flt-diff").value;
   const ply = document.getElementById("flt-ply").value;
+  const typ = document.getElementById("flt-type").value;
+ 
   const list = Object.entries(tasks)
     .map(([id,t]) => ({...t, id}))
     .filter(t => {
@@ -349,62 +604,108 @@ function renderTasks() {
       if (pri && t.priority !== pri) return false;
       if (diff && t.difficulty !== diff) return false;
       if (ply && t.assignee !== ply) return false;
+      if (typ && (t.questType||"manual") !== typ) return false;
       return true;
     })
-    .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-
+    .sort((a,b) => {
+      const po = {High:0,Medium:1,Low:2};
+      const pd = (po[a.priority]||1)-(po[b.priority]||1);
+      return pd !== 0 ? pd : (b.createdAt||0)-(a.createdAt||0);
+    });
+ 
   const el = document.getElementById("task-list");
   if (!list.length) {
     el.innerHTML = `<div style="text-align:center;padding:60px 0;color:#30363d"><div style="font-size:40px;margin-bottom:16px">🌲</div><div style="font-size:9px">NO QUESTS FOUND</div></div>`;
     return;
   }
-  el.innerHTML = list.map(t => {
-    const pc = PCOL[t.priority] || "#8b949e";
-    const commentCount = t.comments ? Object.keys(t.comments).length : 0;
-    const prog = t.useProgress && t.progressMax > 0 ? `
-      <div style="margin-top:8px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="color:#8b949e;font-size:7px">PROGRESS</span>
-          <span style="color:#27ae60;font-size:7px">${t.progress||0}/${t.progressMax}</span>
+  el.innerHTML = list.map(t => renderTaskCard(t)).join("");
+}
+ 
+function renderTaskCard(t) {
+  const pc = PCOL[t.priority] || "#8b949e";
+  const qtype = t.questType || "manual";
+  const qm = QTYPE[qtype] || QTYPE.manual;
+  const commentCount = t.comments ? Object.keys(t.comments).length : 0;
+ 
+  // Progress block for tracked quests
+  let progHtml = "";
+  if (["collect","kill","craft"].includes(qtype)) {
+    const prog = t.progress || 0;
+    const max = t.trackAmount || 0;
+    const target = t.trackTarget || "?";
+    const pct = max > 0 ? Math.min((prog/max)*100, 100) : 0;
+    const isComplete = pct >= 100;
+    const countClass = isComplete ? "complete" : qtype;
+    const fillClass = isComplete ? "complete" : qtype;
+ 
+    progHtml = `
+      <div class="track-block">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">${getItemIcon(target)}</span>
+            <span class="track-target-name">${target}</span>
+            ${t.shared ? `<span style="color:#8957e5;font-size:6px">🌐 SHARED</span>` : ""}
+          </div>
+          <span class="track-counts ${countClass}">${prog} / ${max} ${isComplete ? "✓" : ""}</span>
         </div>
-        <div class="prog-track"><div class="prog-fill" style="width:${Math.min(((t.progress||0)/t.progressMax)*100,100)}%"></div></div>
-        <input type="range" min="0" max="${t.progressMax}" value="${t.progress||0}"
-          oninput="setProgress('${t.id}',this.value)"
-          style="width:100%;margin-top:4px;accent-color:#27ae60;cursor:pointer"/>
-      </div>` : "";
-    const notes = t.notes ? `<div class="vt" style="font-size:13px;color:#8b949e;margin-top:6px">📝 ${t.notes}</div>` : "";
-    const asgn = t.assignee ? `<span class="pill" style="border-color:#8e44ad;color:#8e44ad">👤 ${t.assignee}</span>` : "";
-    const diffPill = t.difficulty ? `<span class="pill diff-${t.difficulty}">${DICON[t.difficulty]||""} ${t.difficulty.toUpperCase()}</span>` : "";
-    return `
-    <div class="task-card${t.completed?" done":""}">
-      <div class="pstripe" style="background:${pc}"></div>
-      <div style="display:flex;align-items:flex-start;gap:10px">
-        <div class="checkbox${t.completed?" checked":""}" onclick="toggleDone('${t.id}',event)">${t.completed?"✓":""}</div>
-        <div style="flex:1;min-width:0">
-          <div style="margin-bottom:6px">
-            <span class="vt" style="font-size:16px;line-height:1;${t.completed?"text-decoration:line-through;color:#8b949e":""}">${t.title}</span>
-          </div>
-          <div>
-            <span class="pill">${CICON[t.category]||"📦"} ${t.category||"?"}</span>
-            <span class="pill" style="border-color:${pc};color:${pc}">${t.priority||"?"}</span>
-            ${diffPill}${asgn}
-          </div>
-          ${prog}${notes}
-          <div style="margin-top:8px">
-            <button class="btn btn-sm" onclick="openComments('${t.id}')" style="color:#58a6ff;border-color:#58a6ff;font-size:7px">
-              💬 COMMENTS ${commentCount > 0 ? `(${commentCount})` : ""}
-            </button>
-          </div>
+        <div class="prog-track" style="height:10px">
+          <div class="prog-fill ${fillClass}" style="width:${pct}%"></div>
         </div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-sm" onclick="openEdit('${t.id}')" style="color:#8b949e">✏️</button>
-          <button class="btn btn-sm" onclick="deleteTask('${t.id}')" style="color:#e74c3c">🗑️</button>
+        ${max > 0 ? `<div style="color:#30363d;font-size:6px;margin-top:4px;text-align:right">${Math.round(pct)}% complete</div>` : ""}
+      </div>`;
+  } else if (qtype === "reach" && t.coordX !== undefined) {
+    progHtml = `<div class="track-block">
+      <div style="color:#8e44ad;font-size:8px">📍 ${t.coordX}, ${t.coordY}, ${t.coordZ}</div>
+      <div style="color:#30363d;font-size:6px;margin-top:4px">Mark done manually when reached</div>
+    </div>`;
+  } else if (qtype === "manual" && t.useProgress && t.progressMax > 0) {
+    const pct = Math.min(((t.progress||0)/t.progressMax)*100,100);
+    progHtml = `<div style="margin-top:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="color:#8b949e;font-size:7px">PROGRESS</span>
+        <span style="color:#27ae60;font-size:7px">${t.progress||0}/${t.progressMax}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <input type="range" min="0" max="${t.progressMax}" value="${t.progress||0}"
+        oninput="setProgress('${t.id}',this.value)"
+        style="width:100%;margin-top:4px;accent-color:#27ae60;cursor:pointer"/>
+    </div>`;
+  }
+ 
+  const notes = t.notes ? `<div class="vt" style="font-size:13px;color:#8b949e;margin-top:6px">📝 ${t.notes}</div>` : "";
+  const asgn = t.assignee ? `<span class="pill" style="border-color:#8e44ad;color:#8e44ad">👤 ${t.assignee}</span>` : "";
+  const diffPill = t.difficulty ? `<span class="pill diff-${t.difficulty}">${DICON[t.difficulty]||""} ${t.difficulty.toUpperCase()}</span>` : "";
+ 
+  return `
+  <div class="task-card${t.completed?" done":""}">
+    <div class="pstripe" style="background:${pc}"></div>
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div class="checkbox${t.completed?" checked":""}" onclick="toggleDone('${t.id}',event)">${t.completed?"✓":""}</div>
+      <div style="flex:1;min-width:0">
+        <div style="margin-bottom:6px">
+          <span class="vt" style="font-size:17px;line-height:1;${t.completed?"text-decoration:line-through;color:#8b949e":""}">${t.title}</span>
+        </div>
+        <div>
+          <span class="type-badge" style="border-color:${qm.color};color:${qm.color}">${qm.icon} ${qm.label}</span>
+          <span class="pill">${CICON[t.category]||"📦"} ${t.category||"?"}</span>
+          <span class="pill" style="border-color:${pc};color:${pc}">${t.priority||"?"}</span>
+          ${diffPill}${asgn}
+        </div>
+        ${progHtml}${notes}
+        <div style="margin-top:8px">
+          <button class="btn btn-sm" onclick="openComments('${t.id}')" style="color:#58a6ff;border-color:#30363d;font-size:6px">
+            💬 ${commentCount > 0 ? commentCount+" COMMENTS" : "COMMENT"}
+          </button>
         </div>
       </div>
-    </div>`;
-  }).join("");
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn btn-sm" onclick="openEdit('${t.id}')" style="color:#8b949e">✏️</button>
+        <button class="btn btn-sm" onclick="deleteTask('${t.id}')" style="color:#e74c3c">🗑️</button>
+      </div>
+    </div>
+  </div>`;
 }
-
+ 
 function renderStats() {
   const tv = Object.values(tasks);
   const total = tv.length, done = tv.filter(t=>t.completed).length;
@@ -414,28 +715,36 @@ function renderStats() {
   ].map(s=>`<div style="text-align:center"><div class="vt" style="font-size:28px;color:${s.c}">${s.v}</div><div style="font-size:7px;color:#8b949e;margin-top:4px">${s.l}</div></div>`).join("");
   if (total) { document.getElementById("st-barwrap").classList.remove("hidden"); document.getElementById("st-bar").style.width=(done/total*100)+"%"; }
   else document.getElementById("st-barwrap").classList.add("hidden");
-
+ 
   document.getElementById("st-cat").innerHTML = CATS.map(c => {
     const n = tv.filter(t=>t.category===c).length;
     return n ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">${CICON[c]} ${c}</span><span class="vt" style="font-size:18px">${n}</span></div>` : "";
   }).join("") || `<div style="color:#30363d;font-size:8px">NO DATA YET</div>`;
-
+ 
+  document.getElementById("st-type").innerHTML = Object.entries(QTYPE).map(([type, meta]) => {
+    const n = tv.filter(t=>(t.questType||"manual")===type).length;
+    return n ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:8px;color:${meta.color}">${meta.icon} ${meta.label}</span>
+      <span class="vt" style="font-size:18px;color:${meta.color}">${n}</span>
+    </div>` : "";
+  }).join("") || `<div style="color:#30363d;font-size:8px">NO DATA YET</div>`;
+ 
   document.getElementById("st-diff").innerHTML = ["Easy","Medium","Hard","Legendary"].map(d => {
     const n = tv.filter(t=>t.difficulty===d).length;
     return n ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:${DCOL[d]}">${DICON[d]} ${d}</span><span class="vt" style="font-size:18px">${n}</span></div>` : "";
   }).join("") || `<div style="color:#30363d;font-size:8px">NO DATA YET</div>`;
-
+ 
   document.getElementById("st-ply").innerHTML = players.map(p => {
     const n = tv.filter(t=>t.assignee===p&&!t.completed).length;
     return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:8px;color:#8b949e">👤 ${p}</span><span class="vt" style="font-size:18px">${n}</span></div>`;
   }).join("");
-
+ 
   document.getElementById("st-pri").innerHTML = ["High","Medium","Low"].map(p => {
     const n = tv.filter(t=>t.priority===p).length;
-    return `<div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:${PCOL[p]};font-size:8px">${p}</span><span class="vt" style="font-size:16px">${n}</span></div><div style="background:#21262d;height:8px"><div style="height:100%;background:${PCOL[p]};width:${total?(n/total*100)+"%":"0%"};transition:width 0.5s"></div></div></div>`;
+    return `<div style="flex:1;min-width:120px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:${PCOL[p]};font-size:8px">${p}</span><span class="vt" style="font-size:16px">${n}</span></div><div style="background:#21262d;height:8px"><div style="height:100%;background:${PCOL[p]};width:${total?(n/total*100)+"%":"0%"};transition:width 0.5s"></div></div></div>`;
   }).join("");
 }
-
+ 
 function renderPlayers() {
   const tv = Object.values(tasks);
   document.getElementById("player-grid").innerHTML = players.map(p => {
@@ -446,7 +755,7 @@ function renderPlayers() {
     return `<div class="card" style="margin-bottom:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-size:9px">👤 ${p}</span>
-        <button onclick="removePlayer('${p}')" style="background:transparent;border:none;color:#30363d;cursor:pointer;font-size:16px;line-height:1">×</button>
+        <button onclick="removePlayer('${p}')" style="background:transparent;border:none;color:#30363d;cursor:pointer;font-size:18px;line-height:1">×</button>
       </div>
       <div style="display:flex;gap:16px">
         ${[{v:mine.length,l:"TOTAL",c:"#58a6ff"},{v:done,l:"DONE",c:"#27ae60"},{v:mine.length-done,l:"LEFT",c:"#f39c12"}]
@@ -457,27 +766,19 @@ function renderPlayers() {
     </div>`;
   }).join("");
 }
-
+ 
 // Comments
 function openComments(taskId) {
   commentTaskId = taskId;
-  const t = tasks[taskId];
   document.getElementById("comment-modal").style.display = "flex";
-  renderComments(t.comments || {});
+  renderComments(tasks[taskId].comments || {});
 }
-function closeComments() {
-  document.getElementById("comment-modal").style.display = "none";
-  commentTaskId = null;
-}
+function closeComments() { document.getElementById("comment-modal").style.display = "none"; commentTaskId = null; }
 function renderComments(comments) {
   const el = document.getElementById("comment-list");
   const list = Object.values(comments).sort((a,b) => a.ts - b.ts);
   if (!list.length) { el.innerHTML = `<div style="color:#30363d;font-size:8px;margin-bottom:8px">NO COMMENTS YET</div>`; return; }
-  el.innerHTML = list.map(c => `
-    <div class="comment">
-      <div class="comment-author">👤 ${c.author} <span style="color:#30363d;font-size:7px">${timeAgo(c.ts)}</span></div>
-      <div class="comment-text">${c.text}</div>
-    </div>`).join("");
+  el.innerHTML = list.map(c => `<div class="comment"><div class="comment-author">👤 ${c.author} <span style="color:#30363d;font-size:7px">${timeAgo(c.ts)}</span></div><div class="comment-text">${c.text}</div></div>`).join("");
 }
 async function submitComment() {
   const text = document.getElementById("comment-text").value.trim();
@@ -485,31 +786,42 @@ async function submitComment() {
   if (!text || !author || !commentTaskId) return;
   const t = tasks[commentTaskId];
   const comments = t.comments || {};
-  comments["c" + Date.now()] = { author, text, ts: Date.now() };
+  comments["c"+Date.now()] = { author, text, ts: Date.now() };
   await fbSet("tasks/"+commentTaskId, {...t, comments});
   document.getElementById("comment-text").value = "";
   renderComments(comments);
 }
 function timeAgo(ts) {
-  const d = Date.now() - ts;
+  const d = Date.now()-ts;
   if (d < 60000) return "just now";
-  if (d < 3600000) return Math.floor(d/60000) + "m ago";
-  if (d < 86400000) return Math.floor(d/3600000) + "h ago";
-  return Math.floor(d/86400000) + "d ago";
+  if (d < 3600000) return Math.floor(d/60000)+"m ago";
+  if (d < 86400000) return Math.floor(d/3600000)+"h ago";
+  return Math.floor(d/86400000)+"d ago";
 }
-
+ 
 // Task actions
 async function toggleDone(id, e) {
   spawnParticles(e.clientX, e.clientY);
   setSyncing(true);
-  await fbSet("tasks/"+id, {...tasks[id], completed: !tasks[id].completed});
+  await fbSet("tasks/"+id, {...tasks[id], completed: !tasks[id].completed, completedAt: Date.now()});
   setSyncing(false);
 }
-async function deleteTask(id) { setSyncing(true); await fbDel("tasks/"+id); setSyncing(false); }
-async function setProgress(id, val) {
-  await fbSet("tasks/"+id, {...tasks[id], progress: Math.min(parseInt(val), tasks[id].progressMax)});
+async function deleteTask(id) {
+  if (!confirm("Delete this quest?")) return;
+  setSyncing(true); await fbDel("tasks/"+id); setSyncing(false);
 }
-
+async function setProgress(id, val) {
+  const t = tasks[id];
+  const newProg = Math.min(parseInt(val), t.progressMax||0);
+  setSyncing(true);
+  await fbPatch("tasks/"+id, {progress: newProg});
+  if (t.useProgress && t.progressMax > 0 && newProg >= t.progressMax) {
+    await fbPatch("tasks/"+id, {completed: true, completedAt: Date.now()});
+    showToast("🎉 Quest Complete!", t.title);
+  }
+  setSyncing(false);
+}
+ 
 // Form
 function onNewClick() {
   if (formOpen) { closeForm(); return; }
@@ -526,31 +838,45 @@ function closeForm() {
   formOpen = false; editingId = null;
 }
 function resetForm() {
-  document.getElementById("f-title").value = "";
+  ["f-title","f-target","f-notes"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("f-cat").value = "Building";
   document.getElementById("f-pri").value = "Medium";
   document.getElementById("f-diff").value = "Medium";
   document.getElementById("f-assign").value = "";
+  document.getElementById("f-amount").value = "1";
+  document.getElementById("f-cx").value = "";
+  document.getElementById("f-cy").value = "";
+  document.getElementById("f-cz").value = "";
+  document.getElementById("f-shared").checked = false;
   document.getElementById("f-useprog").checked = false;
   document.getElementById("f-prog").value = 0;
   document.getElementById("f-progmax").value = 0;
-  document.getElementById("f-notes").value = "";
   document.getElementById("prog-fields").classList.add("hidden");
+  selectQType("manual");
 }
 function toggleProgFields() {
   document.getElementById("prog-fields").classList.toggle("hidden", !document.getElementById("f-useprog").checked);
 }
 function openEdit(id) {
   const t = tasks[id]; editingId = id;
+  selectQType(t.questType || "manual");
   document.getElementById("f-title").value = t.title || "";
   document.getElementById("f-cat").value = t.category || "Building";
   document.getElementById("f-pri").value = t.priority || "Medium";
   document.getElementById("f-diff").value = t.difficulty || "Medium";
   document.getElementById("f-assign").value = t.assignee || "";
+  document.getElementById("f-notes").value = t.notes || "";
+  document.getElementById("f-shared").checked = !!t.shared;
+  if (t.trackTarget) document.getElementById("f-target").value = t.trackTarget;
+  if (t.trackAmount) document.getElementById("f-amount").value = t.trackAmount;
+  if (t.coordX !== undefined) {
+    document.getElementById("f-cx").value = t.coordX;
+    document.getElementById("f-cy").value = t.coordY;
+    document.getElementById("f-cz").value = t.coordZ;
+  }
   document.getElementById("f-useprog").checked = !!t.useProgress;
   document.getElementById("f-prog").value = t.progress || 0;
   document.getElementById("f-progmax").value = t.progressMax || 0;
-  document.getElementById("f-notes").value = t.notes || "";
   document.getElementById("prog-fields").classList.toggle("hidden", !t.useProgress);
   document.getElementById("form-heading").textContent = "✏️ EDIT QUEST";
   document.getElementById("form-sub").textContent = "SAVE CHANGES";
@@ -562,22 +888,50 @@ function openEdit(id) {
 async function submitForm() {
   const title = document.getElementById("f-title").value.trim();
   if (!title) { document.getElementById("f-title").focus(); return; }
+  const qtype = currentQType;
+ 
+  // Validate tracked fields
+  if (["collect","kill","craft"].includes(qtype)) {
+    const target = document.getElementById("f-target").value.trim();
+    if (!target) { document.getElementById("f-target").focus(); return; }
+  }
+ 
   const up = document.getElementById("f-useprog").checked;
   const data = {
-    title, category: document.getElementById("f-cat").value,
+    title, questType: qtype,
+    category: document.getElementById("f-cat").value,
     priority: document.getElementById("f-pri").value,
     difficulty: document.getElementById("f-diff").value,
     assignee: document.getElementById("f-assign").value,
-    notes: document.getElementById("f-notes").value, useProgress: up,
-    progress: up ? parseInt(document.getElementById("f-prog").value)||0 : 0,
-    progressMax: up ? parseInt(document.getElementById("f-progmax").value)||0 : 0,
+    notes: document.getElementById("f-notes").value,
   };
+ 
+  if (["collect","kill","craft"].includes(qtype)) {
+    data.trackTarget = document.getElementById("f-target").value.trim();
+    data.trackAmount = parseInt(document.getElementById("f-amount").value) || 1;
+    data.shared = document.getElementById("f-shared").checked;
+    // Registry path the mod will use for matching
+    // e.g. "Diamond Ore" → "diamond_ore" → mod matches against "minecraft:diamond_ore"
+    data.trackTargetId = displayToRegistry(data.trackTarget);
+    data.progress = editingId ? (tasks[editingId].progress || 0) : 0;
+    data.useProgress = false;
+    data.progressMax = 0;
+  } else if (qtype === "reach") {
+    data.coordX = parseInt(document.getElementById("f-cx").value) || 0;
+    data.coordY = parseInt(document.getElementById("f-cy").value) || 64;
+    data.coordZ = parseInt(document.getElementById("f-cz").value) || 0;
+  } else {
+    data.useProgress = up;
+    data.progress = up ? parseInt(document.getElementById("f-prog").value)||0 : 0;
+    data.progressMax = up ? parseInt(document.getElementById("f-progmax").value)||0 : 0;
+  }
+ 
   setSyncing(true);
   if (editingId) { await fbSet("tasks/"+editingId, {...tasks[editingId], ...data}); }
   else { await fbPush("tasks", {...data, completed:false, createdAt:Date.now()}); }
   setSyncing(false); closeForm(); resetForm();
 }
-
+ 
 // Players
 async function addPlayer() {
   const name = document.getElementById("new-player").value.trim();
@@ -586,18 +940,18 @@ async function addPlayer() {
   document.getElementById("new-player").value = ""; setSyncing(false);
 }
 async function removePlayer(p) { setSyncing(true); await fbSet("players", players.filter(x=>x!==p)); setSyncing(false); }
-
+ 
 // Filters
 function setStatus(s) {
   statusFilter = s;
   ["Active","Completed","All"].forEach(x => {
     const b = document.getElementById("sf-"+x);
-    if (x === s) { b.style.borderColor="#58a6ff"; b.style.color="#58a6ff"; }
-    else { b.style.borderColor="#30363d"; b.style.color="#8b949e"; }
+    b.style.borderColor = x===s ? "#58a6ff" : "#30363d";
+    b.style.color = x===s ? "#58a6ff" : "#8b949e";
   });
   renderTasks();
 }
-
+ 
 // Tabs
 function switchTab(name) {
   ["tasks","stats","players"].forEach(t => {
@@ -605,7 +959,7 @@ function switchTab(name) {
     document.getElementById("tab-"+t).classList.toggle("active", t===name);
   });
 }
-
+ 
 // Particles
 function spawnParticles(x, y) {
   const cols = ["#5dade2","#f39c12","#27ae60","#e74c3c","#8e44ad"];
@@ -616,7 +970,11 @@ function spawnParticles(x, y) {
     document.body.appendChild(el); setTimeout(()=>el.remove(), 850);
   }
 }
-
+function spawnParticlesCenter() {
+  spawnParticles(window.innerWidth/2, window.innerHeight/2);
+  setTimeout(() => spawnParticles(window.innerWidth/2, window.innerHeight/2), 200);
+}
+ 
 window.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
